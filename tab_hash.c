@@ -1,12 +1,12 @@
 // kthxbai
-
+#include <stdio.h>
 
 // A1
 // common data types and macros
 typedef unsigned char      INT8;
 typedef unsigned short     INT16;
 typedef unsigned int       INT32;
-typedef unsigned long long INT64
+typedef unsigned long long INT64;
 typedef INT64              INT96[3];
 
 // different views of a 64-bit double word
@@ -29,7 +29,7 @@ typedef struct {
 } Entry;
 
 // extract lower and upper 32 bits from INT64
-const INT64 LowOnes = (((INT64) 1)) << 32) - 1;
+const INT64 LowOnes = (((INT64) 1) << 32) - 1;
 #define LOW(x) ((x) & LowOnes)
 #define HIGH(x) ((x) >> 32)
 
@@ -162,7 +162,7 @@ inline void MultAddPrime89(INT96 r, INT64 x,
   r[1]  = LOW(s1);
   carry = HIGH(s1);
   
-  r[2] = b[2] + HIGH(d2) + d3 carry;
+  r[2] = b[2] + HIGH(d2) + d3 + carry;
 }
 
 // CW trick for 64-bit key x (Prime = 2^89 - 1)
@@ -180,4 +180,9 @@ inline INT64 CWtrick64(INT64 x, INT96 A,
   return Mod64Prime89(r);
 
 
+}
+
+int main(int argc, char *argv[])
+{
+  printf("hello world! \n");
 }
