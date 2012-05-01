@@ -1,0 +1,14 @@
+- Reference the paper in code and our report
+- add code to generate all the random number  tables we need
+- write code for collision handling
+- benchmark by table size, hash size, load factor, different collision handling
+- also try different computer architecture like one 32 bit one 64 bit
+- dictionary!!!??? i..... ummmm
+  - find a list of words
+  - add code that handles strings
+    - merge two chars into 1
+    -doing that recursively and stuff kthxbai
+    - do benchmark on dictionary stuff
+-write the report using sharelatex.com
+-make lots of graphs!!!
+
