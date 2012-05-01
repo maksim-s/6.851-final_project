@@ -32,8 +32,18 @@ typedef struct {
 const INT64 LowOnes = (((INT64) 1) << 32) - 1;
 #define LOW(x) ((x) & LowOnes)
 #define HIGH(x) ((x) >> 32)
+// A2 Mutliplication-shift based hashing for 32-bit keys
+/* plain univrsal hashing for 32-bit key x
+   A is a random 32-bi odd number */
+inline INT32 Univ(INT32 x, INT32 A) {
+  return (A*x);
+}
 
-
+/* 2-universal hashing for 32-bit key x
+   A and B are random 64-bit numbers */
+inline INT32  Univ2(INT32 x, INT64 A, INT64 B) {
+  return (INT32) ((A*x + B) >> 32);
+}
 // A3 tabulation hashing for 32-bit key x using 16-bit characters.
 /* tabulation hashing for 32-bit key x using 16-bit characters.
    T0, T1, T2 are precomputed tables */
@@ -48,6 +58,30 @@ inline INT32 ShortTable32(INT32 x,
   x1 = x >> 16;
   x2 = x0 + x1;
   return T0[x0] ^ T1[x1] ^ T2[x2];
+}
+
+//A4 Tabulation hased hashing for 32-bit keys using 8-bit characters.
+/* tabulation based hashing for 32-bit key x 
+   using 8-bit characters.
+   T0, T1, T2 ... T6 are pre-compuated tables */
+inline INT32 CharTable32(int32views x,
+  INT32 *T0[], INT32 *T1[], INT32 *T2[], INT32 *T3[],
+  INT32 T4[], INT32 T5[], INT32 T6[])
+{
+  INT32 *a0, *a1, *a2, *a3, c;
+
+  a0 = T0[x.as_int8s[0]];
+  a1 = T1[x.as_int8s[1]];
+  a2 = T2[x.as_int8s[2]];
+  a3 = T3[x.as_int8s[3]];
+
+  c = a0[1] + a1[1] + a2[1] + a3[1];
+  
+  return 
+    a0[0] ^ a1[0] ^ a2[0] ^ a3[0] ^
+    T4[c & 1023] ^ 
+    T5[(c >> 10) & 1023] ^
+    T6[c >> 20];
 }
 
 // A7 tabulation based hashing for 64-bit key x using 16-bit characters.
@@ -73,6 +107,42 @@ inline INT64 ShortTable64(int64views x,
     T5[(c >> 21) & 2097151] ^ T6[c >> 42];
 }
 
+// A8 Tabulation hased hasing for 64-bit keys using 8-bit characters
+/* tabulation based hashing for 64-but key x
+   using 8-bit characters.
+   T0, T1... T14 are pre-computed tables */
+inline INT64 CharTable64( int64views x, 
+  Entry T0[], Entry T1[], Entry T2[], Entry T3[],
+  Entry T4[], Entry T5[], Entry T6[], Entry T7[],
+  INT64 T8[], INT64 T9[], INT64 T10[], INT64 T11[],
+  INT64 T12[], INT64 T13[], INT64 T14[])
+{
+  Entry *a0, *a1, *a2, *a3,
+        *a4, *a5, *a6, *a7;
+  INT64 c0;
+  INT32 c1;
+
+
+  a0 = &T0[x.as_int16s[0]];
+  a1 = &T1[x.as_int16s[1]];
+  a2 = &T2[x.as_int16s[2]];
+  a3 = &T3[x.as_int16s[3]];
+  a4 = &T4[x.as_int16s[4]];
+  a5 = &T5[x.as_int16s[5]];
+  a6 = &T6[x.as_int16s[6]];
+  a7 = &T7[x.as_int16s[7]];
+
+  c0 = a0->u + a1->u + a2->u + a3->u + 
+       a4->u + a5->u + a6->u + a7->u;
+  c1 = a0->v + a1->v + a2->v + a3->v + 
+       a4->v + a5->v + a6->v + a7->v;
+  return
+    a0->h ^ a1->h ^ a2->h ^ a3->h ^
+    a4->h ^ a5->h ^ a6->h ^ a7->h ^
+    T8[c0 & 2043] ^ T9[(c0 >> 11) & 2043] ^
+    T10[(c0 >> 22) & 2043] ^ T11[(c0 >> 33) & 2043] ^
+    T12[c0 >> 44] ^ T13[c1 & 2043] ^ T14[c1 >> 11];
+}
 // A9 CW trick for 32-bit kes with prime 2^61 - 1
 const INT64 Prime = (((INT64) 1 ) << 61) - 1;
 /* computes ax + b mod Prime, possbly plus 2*Prime,
