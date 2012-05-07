@@ -60,6 +60,20 @@ inline INT32 ShortTable32(INT32 x,
   return T0[x0] ^ T1[x1] ^ T2[x2];
 }
 
+
+/*
+ * fills the random number tables for hashing ShortTable32
+ */
+void makeRandShort32(INT32 *T0[],INT32 *T1[],INT32 *T2[]){
+
+}
+
+/*
+ * Clears the random number tables for hashing ShortTable32
+ */
+void clearRandShort32(INT32 *T0[],INT32 *T1[],INT32 *T2[]){
+
+}
 //A4 Tabulation hased hashing for 32-bit keys using 8-bit characters.
 /* tabulation based hashing for 32-bit key x 
    using 8-bit characters.
@@ -84,6 +98,22 @@ inline INT32 CharTable32(int32views x,
     T6[c >> 20];
 }
 
+/*
+ * fills the random number tables for hashing CharTable32
+ */
+void makeRandChar32(INT32 *T0[],INT32 *T1[],INT32 *T2[], INT32 *T3[],
+                    INT32 *T4[], INT32 *T5[], INT32 *T6[])
+{
+
+}
+
+/*
+ * Clears the random number tables for hashing CharTable32
+ */
+void clearRandChar32(INT32 *T0[],INT32 *T1[],INT32 *T2[], INT32 *T3[],
+                    INT32 *T4[], INT32 *T5[], INT32 *T6[])
+{
+}
 // A7 tabulation based hashing for 64-bit key x using 16-bit characters.
 /* tabulation based hashing for 64-bit key x using 16-bit characters.
    T0,.. T6 are precomputed tables */
@@ -107,6 +137,21 @@ inline INT64 ShortTable64(int64views x,
     T5[(c >> 21) & 2097151] ^ T6[c >> 42];
 }
 
+/*
+ * fills the random number tables for hashing ShortTable64
+ */
+void makeRandShort64(INT32 *T0[],INT32 *T1[],INT32 *T2[], INT32 *T3[],
+                     INT32 *T4[], INT32 *T5[], INT32 *T6[])
+{
+}
+
+/*
+ * Clears the random number tables for hashing ShortTable64
+ */
+void clearRandShort64(INT32 *T0[],INT32 *T1[],INT32 *T2[], INT32 *T3[],
+                      INT32 *T4[], INT32 *T5[], INT32 *T6[])
+{
+}
 // A8 Tabulation hased hasing for 64-bit keys using 8-bit characters
 /* tabulation based hashing for 64-but key x
    using 8-bit characters.
@@ -143,6 +188,29 @@ inline INT64 CharTable64( int64views x,
     T10[(c0 >> 22) & 2043] ^ T11[(c0 >> 33) & 2043] ^
     T12[c0 >> 44] ^ T13[c1 & 2043] ^ T14[c1 >> 11];
 }
+
+
+/*
+ * fills the random number tables for hashing CharTable64
+ */
+void makeRandChar64(Entry *T0[],Entry *T1[],Entry *T2[], Entry *T3[],
+                     Entry *T4[], Entry *T5[], Entry *T6[], Entry *T7,
+                     INT64 *T8[], INT64 *T9[], INT64 *T10[], INT64 *T11[],
+                     INT64 *T12[], INT64 *T13[], INT64 *T14[])
+{
+}
+
+/*
+ * Clears the random number tables for hashing ShortTable64
+ */
+void clearRandChar64(Entry *T0[],Entry *T1[],Entry *T2[], Entry *T3[],
+                     Entry *T4[], Entry *T5[], Entry *T6[], Entry *T7,
+                     INT64 *T8[], INT64 *T9[], INT64 *T10[], INT64 *T11[],
+                     INT64 *T12[], INT64 *T13[], INT64 *T14[])
+{
+
+}
+
 // A9 CW trick for 32-bit kes with prime 2^61 - 1
 const INT64 Prime = (((INT64) 1 ) << 61) - 1;
 /* computes ax + b mod Prime, possbly plus 2*Prime,
