@@ -1,10 +1,7 @@
-// kthxbai
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
-// A1
-// common data types and macros
-//typedef uint64_t   INT96[3];
+// kthxbai
 
 // different views of a 64-bit double word
 typedef union {
@@ -29,6 +26,7 @@ typedef struct {
 const uint64_t LowOnes = (((uint64_t) 1) << 32) - 1;
 #define LOW(x) ((x) & LowOnes)
 #define HIGH(x) ((x) >> 32)
+
 // A2 Mutliplication-shift based hashing for 32-bit keys
 /* plain univrsal hashing for 32-bit key x
    A is a random 32-bi odd number */
@@ -247,117 +245,7 @@ void clearRandChar64(Entry *T0[],Entry *T1[],Entry *T2[], Entry *T3[],
 
 }
 
-// A9 CW trick for 32-bit kes with prime 2^61 - 1
-const uint64_t Prime = (((uint64_t) 1 ) << 61) - 1;
-/* computes ax + b mod Prime, possbly plus 2*Prime,
-   expoiting the structures of Prime */
-inline uint64_t MultAddPrime32(uint32_t x,
-			    uint64_t a,
-			    uint64_t b)
-{
-  uint64_t a0, a1, c0, c1, c;
-  a0 = LOW(a) * x;
-  a1 = HIGH(a) * x;
-  c0 = a0 + (a1 << 32);
-  c1 = (a0 >> 32) + a1;
-  c = (c0 & Prime) + (c1 >> 29) + b;
-  return c;
-}
 
-// CWtrick for 32-bit key x (Prime = 2^61 - 1)
-inline uint64_t CWtrick32(uint32_t x, uint64_t A,
-		       uint64_t B, uint64_t C,
-		       uint64_t D, uint64_t E)
-{
-  uint64_t h;
-  h = MultAddPrime32(
-      MultAddPrime32(
-      MultAddPrime32(
-		     MultAddPrime32(x, A, B), x, C), x, D), x, E);
-  h = (h & Prime) + (h >> 61);
-  if (h >= Prime)
-    h -= Prime;
-  return h;
-}
-
-// A11 CW trick for 64-bit keys using prime 2^89 - 1
-const uint64_t Prime89_0  = (((uint64_t) 1) << 32) - 1;
-const uint64_t Prime89_1  = (((uint64_t) 1) << 32) - 1;
-const uint64_t Prime89_2  = (((uint64_t) 1) << 32) - 1;
-const uint64_t Prime89_21 = (((uint64_t) 1) << 32) - 1;
-/**
-/* Computes (r mod Prime89) mod 2^64,
-   exploiting the structure of Prime89 
- 
-inline uint64_t Mod64Prime89(INT96 r)
-{
-  uint64_t r0, r1, r2;
-  // r2r1r0 = r & Prime89 + r >> 89
-  r2 =  r[2];
-  r1 =  r[1];
-  r0 =  r[0] + (r2  >> 25);
-  r2 &= Prime89_2;
-  
-  return (r2 == Prime89_2 &&
-	  r1 == Prime89_1 &&
-	  r0 >= Prime89_0) ?
-         (r0 - Prime89_0) : (r0 + (r1 << 32));
-}
-
-/* Computes a 96-bit r such that r mod Prime89 == (ax + b) mod Prime89
-   exploiting the structure of Prime89 
-
-inline void MultAddPrime89(INT96 r, uint64_t x,
-			   INT96 a, INT96 b)
-{
-  uint64_t x1, x0, c21, c20, c11, c10, c01, c00;
-  uint64_t d0, d1, d2, d3;
-  uint64_t s0, s1, carry;
-
-  x1 = HIGH(x);
-  x0 = LOW(x);
-  
-  c21 = a[2]*x1;
-  c20 = a[2]*x0;
-  c11 = a[1]*x1;
-  c10 = a[1]*x0;
-  c01 = a[0]*x1;
-  c00 = a[0]*x0;
-
-  d0 = (c20 >> 25) + (c11 >> 25) +
-    (c10 >> 57) + (c01 >> 57);
-  d1 = (c21 << 7);
-  d2 = (c10 & Prime89_21) + (c01 & Prime89_21);
-  d3 = (c20 & Prime89_2) + (c11 & Prime89_2) + (c21 >> 57);
-  
-  s0    = b[0] + LOW(c00) + LOW(d0) + LOW(d1);
-  r[0]  = LOW(s0);
-  carry = HIGH(s0);
-
-  s1    = b[1] + HIGH(c00) + HIGH(d0) + HIGH(d1) + LOW(d2) + carry;
-  r[1]  = LOW(s1);
-  carry = HIGH(s1);
-  
-  r[2] = b[2] + HIGH(d2) + d3 + carry;
-}
-
-// CW trick for 64-bit key x (Prime = 2^89 - 1)
-inline uint64_t CWtrick64(uint64_t x, INT96 A,
-		       INT96 B, INT96 C,
-		       INT96 D, INT96 E)
-{
-  INT96 r;
-
-  MultAddPrime89(r, x, A, B);
-  MultAddPrime89(r, x, r, C);
-  MultAddPrime89(r, x, r, D);
-  MultAddPrime89(r, x, r, E);
-
-  return Mod64Prime89(r);
-
-
-}
-*/
 int main(int argc, char *argv[])
 {
   printf("hello world! \n");
