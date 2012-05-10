@@ -80,6 +80,7 @@ inline uint32_t ShortTable32(uint32_t x,
   x2 = x0 + x1;
   x2 = 2 - (x2 >> 16) + (x2 & 65535); //compression
   if(x2 > 65535){
+    x2 = x2 & 65535; // NOTE: what is this?
     printf("ERROR: ShortTable32 has x2 greater than 16 bits \n");    
   }
   return T0[x0] ^ T1[x1] ^ T2[x2];
@@ -400,6 +401,47 @@ void clearRandChar64(Entry** T0,Entry** T1,Entry** T2, Entry** T3,
   free(*T14);
 }
 
+// hash 10^7 32-bit numbers and count the number of collisions
+void linearProbingShort32()
+{
+  void* T0;
+  void* T1;
+  void* T2;
+  uint8_t* hash_table;
+  int i;
+  int n_collisions = 0;
+
+  hash_table = malloc(10000000);
+  for (i = 0; i < 10000000; i++) {
+    hash_table[i] = (uint8_t) 0;
+  }
+  makeRandShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2);
+  for(i = 0; i < 1000000; i++) {
+    uint32_t index_hash = ShortTable32((uint32_t) i, (uint32_t*) T0,(uint32_t*) T1, (uint32_t*) T2) % 10000000;
+    while (hash_table[index_hash]) {
+      index_hash ++;
+      n_collisions ++;
+    }
+    hash_table[index_hash] = 1;
+  }
+  clearRandShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2);
+  printf("Number of collisions: %d\n", n_collisions);
+}
+
+void linearProbingChar32()
+{
+
+}
+
+void linearProbingShort64()
+{
+
+}
+
+void linearProbingChar64()
+{
+
+}
 
 int main(int argc, char *argv[])
 {
@@ -421,7 +463,8 @@ int main(int argc, char *argv[])
   void* T14;
   void* T15;
   int i;
-
+  linearProbingShort32();
+  /*
   makeRandChar64((Entry**) &T0,(Entry**) &T1,(Entry**) &T2, (Entry**) &T3,
 		 (Entry**) &T4, (Entry**) &T5, (Entry**) &T6, (Entry**) &T7,
 		 (uint64_t**) &T8, (uint64_t**) &T9, (uint64_t**) &T10, (uint64_t**) &T11,
@@ -440,7 +483,6 @@ int main(int argc, char *argv[])
 		 (uint64_t**) &T8, (uint64_t**) &T9, (uint64_t**) &T10, (uint64_t**) &T11,
 		 (uint64_t**) &T12, (uint64_t**) &T13, (uint64_t**) &T14);
 
-  /*
 
   printf("The address of T0: %p , T1: %p, T2: %p \n", T0, T1, T2); 
   makeRandShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2);
