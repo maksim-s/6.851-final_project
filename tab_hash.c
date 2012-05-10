@@ -3,6 +3,9 @@
 #include <inttypes.h>
 // kthxbai
 
+#define TABLE_SIZE 10000000
+#define N_HASHES 1000000
+
 // different views of a 64-bit double word
 typedef union {
   uint64_t as_uint64_t;
@@ -81,7 +84,7 @@ inline uint32_t ShortTable32(uint32_t x,
   x2 = 2 - (x2 >> 16) + (x2 & 65535); //compression
   if(x2 > 65535){
     x2 = x2 & 65535; // NOTE: what is this?
-    printf("ERROR: ShortTable32 has x2 greater than 16 bits \n");    
+    //printf("ERROR: ShortTable32 has x2 greater than 16 bits \n");    
   }
   return T0[x0] ^ T1[x1] ^ T2[x2];
 }
@@ -410,14 +413,16 @@ void linearProbingShort32()
   uint8_t* hash_table;
   int i;
   int n_collisions = 0;
+  uint32_t index_hash;
 
-  hash_table = malloc(10000000);
-  for (i = 0; i < 10000000; i++) {
+  hash_table = malloc(TABLE_SIZE);
+  for (i = 0; i < TABLE_SIZE; i++) {
     hash_table[i] = (uint8_t) 0;
   }
   makeRandShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2);
-  for(i = 0; i < 1000000; i++) {
-    uint32_t index_hash = ShortTable32((uint32_t) i, (uint32_t*) T0,(uint32_t*) T1, (uint32_t*) T2) % 10000000;
+  for(i = 0; i < N_HASHES; i++) {
+    index_hash = ShortTable32((uint32_t) i, (uint32_t*) T0,(uint32_t*) T1, (uint32_t*) T2);
+    index_hash = index_hash % TABLE_SIZE;
     while (hash_table[index_hash]) {
       index_hash ++;
       n_collisions ++;
@@ -425,22 +430,134 @@ void linearProbingShort32()
     hash_table[index_hash] = 1;
   }
   clearRandShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2);
-  printf("Number of collisions: %d\n", n_collisions);
+  printf("Linear Probing (Short32): Number of collisions: %d\n", n_collisions);
 }
 
 void linearProbingChar32()
 {
+  void* T0;
+  void* T1;
+  void* T2;
+  void* T3;
+  void* T4;
+  void* T5;
+  void* T6;
+  int i;
+  uint8_t* hash_table;
+  int n_collisions = 0;
+  uint32_t index_hash;
+
+  hash_table = malloc(TABLE_SIZE);
+  for(i = 0; i < TABLE_SIZE; i++) {
+    hash_table[i] = (uint8_t) 0;
+  }
+  makeRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
+                 (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
+                 (uint32_t**) &T6);
+  for(i = 0; i < N_HASHES; i++) {
+    index_hash = CharTable32((uint32_t) i, (uint32_t*) T0,(uint32_t*) T1, (uint32_t*) T2,
+			     (uint32_t*) T3, (uint32_t*) T4, (uint32_t*) T5, (uint32_t*) T6);
+    index_hash = index_hash % TABLE_SIZE;
+    while(hash_table[index_hash]) {
+      index_hash ++;
+      n_collisions ++;
+    }
+    hash_table[index_hash] = 1;
+  }
+  clearRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
+                 (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
+                 (uint32_t**) &T6);
+  printf("Linear Probing (Char32): number of collisions: %d\n", n_collisions);
 
 }
 
 void linearProbingShort64()
 {
+  void* T0;
+  void* T1;
+  void* T2;
+  void* T3;
+  void* T4;
+  void* T5;
+  void* T6;
+  int i;
+  uint8_t* hash_table;
+  int n_collisions = 0;
+  uint64_t index_hash;
 
+  hash_table = malloc(TABLE_SIZE);
+  for(i = 0; i < TABLE_SIZE; i++) {
+    hash_table[i] = (uint8_t) 0;
+  }
+  makeRandShort64((uint64_t**) &T0, (uint64_t**) &T1, (uint64_t**) &T2,
+		  (uint64_t**) &T3, (uint64_t**) &T4, (uint64_t**) &T5,
+		  (uint64_t**) &T6);
+  for(i = 0; i < N_HASHES; i++) {
+    index_hash = ShortTable64((uint64_t) i, (uint64_t*) T0,(uint64_t*) T1, (uint64_t*) T2,
+			      (uint64_t*) T3, (uint64_t*) T4, (uint64_t*) T5, (uint64_t*) T6);
+    index_hash = index_hash % TABLE_SIZE;
+    while(hash_table[index_hash]) {
+      index_hash ++;
+      n_collisions ++;
+    }
+    hash_table[index_hash] = 1;
+  }
+  clearRandShort64((uint64_t**) &T0, (uint64_t**) &T1, (uint64_t**) &T2,
+		   (uint64_t**) &T3, (uint64_t**) &T4, (uint64_t**) &T5,
+		   (uint64_t**) &T6);
+  printf("Linear Probing (Short64): number of collisions: %d\n", n_collisions);
 }
 
 void linearProbingChar64()
 {
+  void* T0;
+  void* T1;
+  void* T2;
+  void* T3;
+  void* T4;
+  void* T5;
+  void* T6;
+  void* T7;
+  void* T8;
+  void* T9;
+  void* T10;
+  void* T11;
+  void* T12;
+  void* T13;
+  void* T14;
+  int i;
+  uint8_t* hash_table;
+  int n_collisions = 0;
+  uint64_t index_hash;
 
+  hash_table = malloc(TABLE_SIZE);
+  for(i = 0; i < TABLE_SIZE; i++) {
+    hash_table[i] = (uint8_t) 0;
+  }
+
+  makeRandChar64((Entry**) &T0,(Entry**) &T1,(Entry**) &T2, (Entry**) &T3,
+		 (Entry**) &T4, (Entry**) &T5, (Entry**) &T6, (Entry**) &T7,
+		 (uint64_t**) &T8, (uint64_t**) &T9, (uint64_t**) &T10, (uint64_t**) &T11,
+		 (uint64_t**) &T12, (uint64_t**) &T13, (uint64_t**) &T14);
+
+  for(i = 0; i < N_HASHES; i++) {
+    index_hash = CharTable64((uint64_t) i, 
+			     (Entry*) T0, (Entry*) T1, (Entry*) T2, (Entry*) T3,
+			     (Entry*) T4, (Entry*) T5, (Entry*) T6, (Entry*) T7,
+			     (uint64_t*) T8, (uint64_t*) T9, (uint64_t*) T10, (uint64_t*) T11,
+			     (uint64_t*) T12, (uint64_t*) T13, (uint64_t*) T14);
+    index_hash = index_hash % TABLE_SIZE;
+    while(hash_table[index_hash]) {
+      index_hash ++;
+      n_collisions ++;
+    }
+    hash_table[index_hash] = 1;
+  }
+  clearRandChar64((Entry**) &T0,(Entry**) &T1,(Entry**) &T2, (Entry**) &T3,
+		  (Entry**) &T4, (Entry**) &T5, (Entry**) &T6, (Entry**) &T7,
+		  (uint64_t**) &T8, (uint64_t**) &T9, (uint64_t**) &T10, (uint64_t**) &T11,
+		  (uint64_t**) &T12, (uint64_t**) &T13, (uint64_t**) &T14);
+  printf("Linear Probing (Char64): number of collisions: %d\n", n_collisions);
 }
 
 int main(int argc, char *argv[])
@@ -463,7 +580,10 @@ int main(int argc, char *argv[])
   void* T14;
   void* T15;
   int i;
+  linearProbingShort64();
   linearProbingShort32();
+  linearProbingChar64();
+  linearProbingChar32();
   /*
   makeRandChar64((Entry**) &T0,(Entry**) &T1,(Entry**) &T2, (Entry**) &T3,
 		 (Entry**) &T4, (Entry**) &T5, (Entry**) &T6, (Entry**) &T7,
