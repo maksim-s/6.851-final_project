@@ -121,8 +121,17 @@ inline uint32_t CharTable32(uint32_t x,
   a0 = &T0[(x & 255) * 2];
   a1 = &T1[((x>>8) & 255) * 2];
   a2 = &T2[((x>>16) & 255) * 2];
-  a3 = &T3[((x>>24) & 255) *2];
-
+  a3 = &T3[((x>>24)) * 2];
+  /*
+  printf("T0 address: %p, a0 address: %p,\
+          \nT1 address: %p, a1 address: %p,\
+          \nT2 address: %p, a2 address: %p,\
+          \nT3 address: %p, a3 address: %p,\
+          \nT4 address: %p,\
+          \nT5 address: %p,\
+          \nT6 address: %p \n",\
+          T0, a0, T1, a1, T2, a2, T3, a3, T4, T5, T6);
+  */
   c = a0[1] + a1[1] + a2[1] + a3[1];
   
   return 
@@ -138,13 +147,23 @@ inline uint32_t CharTable32(uint32_t x,
 void makeRandChar32(uint32_t** T0 ,uint32_t** T1,uint32_t** T2, uint32_t** T3,
                     uint32_t** T4, uint32_t** T5, uint32_t** T6)
 {
-  *T0 = malloc(256 *2 * 4); // table of 2^8 pairs of 32-bit integers
-  *T1 = malloc(256 *2 * 4); // table of 2^8 pairs of 32-bit integers
-  *T2 = malloc(256 *2 * 4); // table of 2^8 pairs of 32-bit integers
-  *T3 = malloc(256 *2 * 4); // table of 2^8 pairs of 32-bit integers
+  *T0 = malloc(256 * 2 * 4); // table of 2^8 pairs of 32-bit integers
+  *T1 = malloc(256 * 2 * 4); // table of 2^8 pairs of 32-bit integers
+  *T2 = malloc(256 * 2 * 4); // table of 2^8 pairs of 32-bit integers
+  *T3 = malloc(256 * 2 * 4); // table of 2^8 pairs of 32-bit integers
   *T4 = malloc(1024 * 4); // table of 2^10 32-bit integers
   *T5 = malloc(1024 * 4); // table of 2^10 32-bit integers
   *T6 = malloc(4096 * 4); // table of 2^12 32-bit integers
+ /* 
+  printf("T0 address: %p,\
+          \nT1 address: %p,\
+          \nT2 address: %p,\ 
+          \nT3 address: %p,\
+          \nT4 address: %p, \ 
+          \nT5 address: %p, \
+          \nT6 address: %p \n ",\
+          *T0, *T1, *T2, *T3, *T4, *T5, *T6);
+  */
   int i; 
   for(i = 0; i < 512; i++){
     (*T0)[i] = rand32();
@@ -310,16 +329,17 @@ int main(int argc, char *argv[])
   clearRandShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2);
 
   makeRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
-                 (uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
+                 (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
                  (uint32_t**) &T6);
-  
+  /*
   int i;
-  for( i =0 ; i < 1; i++){
-    printf("%u, \n",CharTable32(rand32(), (uint32_t*) T0,(uint32_t*) T1, (uint32_t*) T2,
+  for( i =0 ; i < 1000; i++){
+    printf("%u, \n",CharTable32((uint32_t) i, (uint32_t*) T0,(uint32_t*) T1, (uint32_t*) T2,
                                 (uint32_t*) T3, (uint32_t*) T4, (uint32_t*) T5, (uint32_t*) T6));
   }
-  makeRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
-                 (uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
+  */
+  clearRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
+                 (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
                  (uint32_t**) &T6);
   
 }
