@@ -89,9 +89,9 @@ inline uint32_t ShortTable32(uint32_t x,
  * fills the random number tables for hashing ShortTable32
  */
 void makeRandShort32(uint32_t** T0, uint32_t** T1, uint32_t** T2){
-  *T0 = malloc(65536 * 4);
-  *T1 = malloc(65536 * 4);
-  *T2 = malloc(65536 * 4);
+  *T0 = malloc(65536 * 4); //tables of 2^16 32-bit numbers
+  *T1 = malloc(65536 * 4); //tables of 2^16 32-bit numbers
+  *T2 = malloc(65536 * 4); //tables of 2^16 32-bit numbers
   int i;
   for(i = 0; i < 65536; i++){
     (*T0)[i] = rand32();
@@ -112,17 +112,26 @@ void clearRandShort32(uint32_t** T0, uint32_t** T1, uint32_t** T2){
 /* tabulation based hashing for 32-bit key x 
    using 8-bit characters.
    T0, T1, T2 ... T6 are pre-compuated tables */
-inline uint32_t CharTable32(uint32_tviews x,
-  uint32_t *T0[], uint32_t *T1[], uint32_t *T2[], uint32_t *T3[],
+inline uint32_t CharTable32(uint32_t x,
+  uint32_t T0[], uint32_t T1[], uint32_t T2[], uint32_t T3[],
   uint32_t T4[], uint32_t T5[], uint32_t T6[])
 {
   uint32_t *a0, *a1, *a2, *a3, c;
 
-  a0 = T0[x.as_uint8_ts[0]];
-  a1 = T1[x.as_uint8_ts[1]];
-  a2 = T2[x.as_uint8_ts[2]];
-  a3 = T3[x.as_uint8_ts[3]];
-
+  a0 = &T0[(x & 255) * 2];
+  a1 = &T1[((x>>8) & 255) * 2];
+  a2 = &T2[((x>>16) & 255) * 2];
+  a3 = &T3[((x>>24)) * 2];
+  /*
+  printf("T0 address: %p, a0 address: %p,\
+          \nT1 address: %p, a1 address: %p,\
+          \nT2 address: %p, a2 address: %p,\
+          \nT3 address: %p, a3 address: %p,\
+          \nT4 address: %p,\
+          \nT5 address: %p,\
+          \nT6 address: %p \n",\
+          T0, a0, T1, a1, T2, a2, T3, a3, T4, T5, T6);
+  */
   c = a0[1] + a1[1] + a2[1] + a3[1];
   
   return 
@@ -138,15 +147,52 @@ inline uint32_t CharTable32(uint32_tviews x,
 void makeRandChar32(uint32_t** T0 ,uint32_t** T1,uint32_t** T2, uint32_t** T3,
                     uint32_t** T4, uint32_t** T5, uint32_t** T6)
 {
-
+  *T0 = malloc(256 * 2 * 4); // table of 2^8 pairs of 32-bit integers
+  *T1 = malloc(256 * 2 * 4); // table of 2^8 pairs of 32-bit integers
+  *T2 = malloc(256 * 2 * 4); // table of 2^8 pairs of 32-bit integers
+  *T3 = malloc(256 * 2 * 4); // table of 2^8 pairs of 32-bit integers
+  *T4 = malloc(1024 * 4); // table of 2^10 32-bit integers
+  *T5 = malloc(1024 * 4); // table of 2^10 32-bit integers
+  *T6 = malloc(4096 * 4); // table of 2^12 32-bit integers
+ /* 
+  printf("T0 address: %p,\
+          \nT1 address: %p,\
+          \nT2 address: %p,\ 
+          \nT3 address: %p,\
+          \nT4 address: %p, \ 
+          \nT5 address: %p, \
+          \nT6 address: %p \n ",\
+          *T0, *T1, *T2, *T3, *T4, *T5, *T6);
+  */
+  int i; 
+  for(i = 0; i < 512; i++){
+    (*T0)[i] = rand32();
+    (*T1)[i] = rand32();
+    (*T2)[i] = rand32();
+    (*T3)[i] = rand32();
+  }
+  for(i = 0; i < 1024; i++){
+    (*T4)[i] = rand32();
+    (*T5)[i] = rand32();
+  }
+  for(i = 0; i < 4096; i++){
+    (*T6)[i] = rand32();
+  }
 }
 
 /*
  * Clears the random number tables for hashing CharTable32
  */
-void clearRandChar32(uint32_t *T0[],uint32_t *T1[],uint32_t *T2[], uint32_t *T3[],
-                    uint32_t *T4[], uint32_t *T5[], uint32_t *T6[])
+void clearRandChar32(uint32_t** T0, uint32_t** T1, uint32_t** T2, uint32_t** T3,
+                    uint32_t** T4, uint32_t** T5, uint32_t** T6)
 {
+  free(*T0);
+  free(*T1);
+  free(*T2);
+  free(*T3);
+  free(*T4);
+  free(*T5);
+  free(*T6);
 }
 
 
@@ -333,6 +379,20 @@ int main(int argc, char *argv[])
     printf("%u, \n",ShortTable32(rand32(), (uint32_t*) T0,(uint32_t*) T1, (uint32_t*) T2 ));
   }
   */
- clearRandShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2);
+  clearRandShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2);
 
+  makeRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
+                 (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
+                 (uint32_t**) &T6);
+  /*
+  int i;
+  for( i =0 ; i < 1000; i++){
+    printf("%u, \n",CharTable32((uint32_t) i, (uint32_t*) T0,(uint32_t*) T1, (uint32_t*) T2,
+                                (uint32_t*) T3, (uint32_t*) T4, (uint32_t*) T5, (uint32_t*) T6));
+  }
+  */
+  clearRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
+                 (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
+                 (uint32_t**) &T6);
+  
 }
