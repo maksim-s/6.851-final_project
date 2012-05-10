@@ -64,6 +64,7 @@ inline uint64_t rand64(){
 
   return rand64;
 }
+
 // A3 tabulation hashing for 32-bit key x using 16-bit characters.
 /* tabulation hashing for 32-bit key x using 16-bit characters.
    T0, T1, T2 are precomputed tables */
@@ -276,7 +277,7 @@ void clearRandShort64(uint64_t** T0, uint64_t** T1, uint64_t** T2, uint64_t** T3
 /* tabulation based hashing for 64-but key x
    using 8-bit characters.
    T0, T1... T14 are pre-computed tables */
-inline uint64_t CharTable64( uint64_tviews x, 
+inline uint64_t CharTable64( uint64_t x, 
   Entry T0[], Entry T1[], Entry T2[], Entry T3[],
   Entry T4[], Entry T5[], Entry T6[], Entry T7[],
   uint64_t T8[], uint64_t T9[], uint64_t T10[], uint64_t T11[],
@@ -286,16 +287,16 @@ inline uint64_t CharTable64( uint64_tviews x,
         *a4, *a5, *a6, *a7;
   uint64_t c0;
   uint32_t c1;
+  
 
-
-  a0 = &T0[x.as_uint16_ts[0]];
-  a1 = &T1[x.as_uint16_ts[1]];
-  a2 = &T2[x.as_uint16_ts[2]];
-  a3 = &T3[x.as_uint16_ts[3]];
-  a4 = &T4[x.as_uint16_ts[4]];
-  a5 = &T5[x.as_uint16_ts[5]];
-  a6 = &T6[x.as_uint16_ts[6]];
-  a7 = &T7[x.as_uint16_ts[7]];
+  a0 = &T0[(uint8_t) x];
+  a1 = &T1[(uint8_t) (x >> 8)];
+  a2 = &T2[(uint8_t) (x >> 16)];
+  a3 = &T3[(uint8_t) (x >> 24)];
+  a4 = &T4[(uint8_t) (x >> 32)];
+  a5 = &T5[(uint8_t) (x >> 40)];
+  a6 = &T6[(uint8_t) (x >> 48)];
+  a7 = &T7[(uint8_t) (x >> 56)];
 
   c0 = a0->u + a1->u + a2->u + a3->u + 
        a4->u + a5->u + a6->u + a7->u;
@@ -313,22 +314,90 @@ inline uint64_t CharTable64( uint64_tviews x,
 /*
  * fills the random number tables for hashing CharTable64
  */
-void makeRandChar64(Entry *T0[],Entry *T1[],Entry *T2[], Entry *T3[],
-                     Entry *T4[], Entry *T5[], Entry *T6[], Entry *T7,
-                     uint64_t *T8[], uint64_t *T9[], uint64_t *T10[], uint64_t *T11[],
-                     uint64_t *T12[], uint64_t *T13[], uint64_t *T14[])
+void makeRandChar64(Entry** T0,Entry** T1,Entry** T2, Entry** T3,
+                     Entry** T4, Entry** T5, Entry** T6, Entry** T7,
+                     uint64_t** T8, uint64_t** T9, uint64_t** T10, uint64_t** T11,
+                     uint64_t** T12, uint64_t** T13, uint64_t** T14)
 {
+  *T0 = malloc(256 * 20); //tables of 2^16 (32-bit + 64-bit + 64-bit) Entries
+  *T1 = malloc(256 * 20); //tables of 2^16 (32-bit + 64-bit + 64-bit) Entries
+  *T2 = malloc(256 * 20); //tables of 2^16 (32-bit + 64-bit + 64-bit) Entries
+  *T3 = malloc(256 * 20); //tables of 2^16 (32-bit + 64-bit + 64-bit) Entries
+  *T4 = malloc(256 * 20); //tables of 2^16 (32-bit + 64-bit + 64-bit) Entries
+  *T5 = malloc(256 * 20); //tables of 2^16 (32-bit + 64-bit + 64-bit) Entries
+  *T6 = malloc(256 * 20); //tables of 2^16 (32-bit + 64-bit + 64-bit) Entries
+  *T7 = malloc(256 * 20); //tables of 2^16 (32-bit + 64-bit + 64-bit) Entries
+  *T8 = malloc(2048 * 8); //tables of 2^11 64-bit numbers
+  *T9 = malloc(2048 * 8); //tables of 2^11 64-bit numbers
+  *T10 = malloc(2048 * 8); //tables of 2^11 64-bit numbers
+  *T11 = malloc(2048 * 8); //tables of 2^11 64-bit numbers
+  *T12 = malloc(2097152 * 8); //tables of 2^21 64-bit numbers
+  *T13 = malloc(2048 * 8); //tables of 2^11 64-bit numbers
+  *T14 = malloc(2097152 * 8); //tables of 2^21 64-bit numbers
+  
+  int i;
+  for (i  = 0; i < 256; i++) {
+    (*T0)[i].h = rand64();
+    (*T0)[i].u = rand64();
+    (*T0)[i].v = rand32();
+    (*T1)[i].h = rand64();
+    (*T1)[i].u = rand64();
+    (*T1)[i].v = rand32();
+    (*T2)[i].h = rand64();
+    (*T2)[i].u = rand64();
+    (*T2)[i].v = rand32();
+    (*T3)[i].h = rand64();
+    (*T3)[i].u = rand64();
+    (*T3)[i].v = rand32();
+    (*T4)[i].h = rand64();
+    (*T4)[i].u = rand64();
+    (*T4)[i].v = rand32();
+    (*T5)[i].h = rand64();
+    (*T5)[i].u = rand64();
+    (*T5)[i].v = rand32();
+    (*T6)[i].h = rand64();
+    (*T6)[i].u = rand64();
+    (*T6)[i].v = rand32();
+    (*T7)[i].h = rand64();
+    (*T7)[i].u = rand64();
+    (*T7)[i].v = rand32();
+  }
+
+  for (i = 0; i < 2048; i++) {
+    (*T9)[i] = rand64();
+    (*T10)[i] = rand64();
+    (*T11)[i] = rand64();
+    (*T13)[i] = rand64();
+  }
+  for (i = 0; i < 2097152; i++) {
+    (*T12)[i] = rand64();
+    (*T14)[i] = rand64();
+  }
 }
 
 /*
  * Clears the random number tables for hashing ShortTable64
  */
-void clearRandChar64(Entry *T0[],Entry *T1[],Entry *T2[], Entry *T3[],
-                     Entry *T4[], Entry *T5[], Entry *T6[], Entry *T7,
-                     uint64_t *T8[], uint64_t *T9[], uint64_t *T10[], uint64_t *T11[],
-                     uint64_t *T12[], uint64_t *T13[], uint64_t *T14[])
+void clearRandChar64(Entry** T0,Entry** T1,Entry** T2, Entry** T3,
+                     Entry** T4, Entry** T5, Entry** T6, Entry** T7,
+                     uint64_t** T8, uint64_t** T9, uint64_t** T10, uint64_t** T11,
+                     uint64_t** T12, uint64_t** T13, uint64_t** T14)
 {
-
+  free(*T0);
+  free(*T1);
+  free(*T2);
+  free(*T3);
+  free(*T4);
+  free(*T5);
+  free(*T6);
+  free(*T7);
+  free(*T8);
+  free(*T9);
+  free(*T10);
+  free(*T11);
+  free(*T12);
+  free(*T13);
+  free(*T14);
 }
 
 
@@ -351,6 +420,27 @@ int main(int argc, char *argv[])
   void* T13;
   void* T14;
   void* T15;
+  int i;
+
+  makeRandChar64((Entry**) &T0,(Entry**) &T1,(Entry**) &T2, (Entry**) &T3,
+		 (Entry**) &T4, (Entry**) &T5, (Entry**) &T6, (Entry**) &T7,
+		 (uint64_t**) &T8, (uint64_t**) &T9, (uint64_t**) &T10, (uint64_t**) &T11,
+		 (uint64_t**) &T12, (uint64_t**) &T13, (uint64_t**) &T14);
+  printf("haha\n");
+  for(i = 0; i < 1000; i++) {
+    printf("%u, \n", CharTable64((uint64_t) i, 
+				 (Entry*) T0, (Entry*) T1, (Entry*) T2, (Entry*) T3,
+				 (Entry*) T4, (Entry*) T5, (Entry*) T6, (Entry*) T7,
+				 (uint64_t*) T8, (uint64_t*) T9, (uint64_t*) T10, (uint64_t*) T11,
+				 (uint64_t*) T12, (uint64_t*) T13, (uint64_t*) T14));
+  }
+  printf("haha2\n");
+  clearRandChar64((Entry**) &T0,(Entry**) &T1,(Entry**) &T2, (Entry**) &T3,
+		 (Entry**) &T4, (Entry**) &T5, (Entry**) &T6, (Entry**) &T7,
+		 (uint64_t**) &T8, (uint64_t**) &T9, (uint64_t**) &T10, (uint64_t**) &T11,
+		 (uint64_t**) &T12, (uint64_t**) &T13, (uint64_t**) &T14);
+
+  /*
 
   printf("The address of T0: %p , T1: %p, T2: %p \n", T0, T1, T2); 
   makeRandShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2);
@@ -359,7 +449,6 @@ int main(int argc, char *argv[])
 		  (uint64_t**) &T6, (uint64_t**) &T7, (uint64_t**) &T8,
 		  (uint64_t**) &T9);
   printf("The address of T0: %p , T1: %p, T2: %p \n", T0, T1, T2); 
-  int i;
   for( i =0 ; i < 1000; i++){
     printf("%u, \n",ShortTable64((uint64_t) i, (uint64_t*) T3, (uint64_t*) T4,
 				 (uint64_t*) T5, (uint64_t*) T6, (uint64_t*) T7,
@@ -370,29 +459,28 @@ int main(int argc, char *argv[])
 		   (uint64_t**) &T9);
   printf("The address of T0: %p , T1: %p, T2: %p \n", T0, T1, T2); 
   printf("First few numbers  %u , %u \n", ((uint32_t*)T0)[0], ((uint32_t*)T0)[5]);
- 
+  
   //Test for randomness
-  /*
   printf("Rand is at most %x, %d \n" , RAND_MAX, RAND_MAX); 
   int i;
   for( i =0 ; i < 1000; i++){
     printf("%u, \n",ShortTable32(rand32(), (uint32_t*) T0,(uint32_t*) T1, (uint32_t*) T2 ));
   }
-  */
+  
   clearRandShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2);
 
   makeRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
                  (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
                  (uint32_t**) &T6);
-  /*
+  
   int i;
   for( i =0 ; i < 1000; i++){
     printf("%u, \n",CharTable32((uint32_t) i, (uint32_t*) T0,(uint32_t*) T1, (uint32_t*) T2,
                                 (uint32_t*) T3, (uint32_t*) T4, (uint32_t*) T5, (uint32_t*) T6));
   }
-  */
+  
   clearRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
                  (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
                  (uint32_t**) &T6);
-  
+  */
 }
