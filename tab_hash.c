@@ -1,62 +1,88 @@
 // kthxbai
 #include <stdio.h>
-
+#include <stdlib.h>
+#include <inttypes.h>
 // A1
 // common data types and macros
-typedef unsigned char      INT8;
-typedef unsigned short     INT16;
-typedef unsigned int       INT32;
-typedef unsigned long long INT64;
-typedef INT64              INT96[3];
+//typedef uint64_t   INT96[3];
 
 // different views of a 64-bit double word
 typedef union {
-  INT64 as_int64;
-  INT16 as_int16s[4];
-} int64views;
+  uint64_t as_uint64_t;
+  uint16_t as_uint16_ts[4];
+} uint64_tviews;
 
 // different views of a 32-bit single word
 typedef union {
-  INT64 as_int32;
-  INT16 as_int16s[2];
-  INT8 as_int8s[4];
-} int32views;
+  uint64_t as_uint32_t;
+  uint16_t as_uint16_ts[2];
+  uint8_t as_uint8_ts[4];
+} uint32_tviews;
 
 typedef struct {
-  INT64 h;
-  INT64 u;
-  INT32 v;
+  uint64_t h;
+  uint64_t u;
+  uint32_t v;
 } Entry;
 
-// extract lower and upper 32 bits from INT64
-const INT64 LowOnes = (((INT64) 1) << 32) - 1;
+// extract lower and upper 32 bits from uint64_t
+const uint64_t LowOnes = (((uint64_t) 1) << 32) - 1;
 #define LOW(x) ((x) & LowOnes)
 #define HIGH(x) ((x) >> 32)
 // A2 Mutliplication-shift based hashing for 32-bit keys
 /* plain univrsal hashing for 32-bit key x
    A is a random 32-bi odd number */
-inline INT32 Univ(INT32 x, INT32 A) {
+inline uint32_t Univ(uint32_t x, uint32_t A) {
   return (A*x);
 }
 
 /* 2-universal hashing for 32-bit key x
    A and B are random 64-bit numbers */
-inline INT32  Univ2(INT32 x, INT64 A, INT64 B) {
-  return (INT32) ((A*x + B) >> 32);
+inline uint32_t  Univ2(uint32_t x, uint64_t A, uint64_t B) {
+  return (uint32_t) ((A*x + B) >> 32);
+}
+
+/*
+ * Pieces together a 32-bit random number from rand()
+ *  since rand() only gets random number from 0 to 32767 which is also 15-bits
+ */
+inline uint32_t rand32(){
+  uint32_t rand32 = (((uint32_t)rand() & 32767) << 17) |
+                    (((uint32_t)rand() & 32767) << 2)  |
+                    ((uint32_t)rand() & 3);  
+
+  return rand32;
+}
+/*
+ * Pieces together a 64-bit  random number from rand()
+ *  since rand() only gets random number from 0 to 32767 which is also 15-bits
+ */
+inline uint64_t rand64(){
+  uint64_t rand64 = (((uint64_t)rand() & 32767) << 49) |
+                    (((uint64_t)rand() & 32767) << 34) |
+                    (((uint64_t)rand() & 32767) << 19) |
+                    (((uint64_t)rand() & 32767) << 4)  |
+                    ((uint64_t)rand() & 15);  
+
+  return rand64;
 }
 // A3 tabulation hashing for 32-bit key x using 16-bit characters.
 /* tabulation hashing for 32-bit key x using 16-bit characters.
    T0, T1, T2 are precomputed tables */
 
-inline INT32 ShortTable32(INT32 x, 
-			  INT32 T0[],
-			  INT32 T1[],
-			  INT32 T2[]) 
+inline uint32_t ShortTable32(uint32_t x, 
+			  uint32_t T0[],
+			  uint32_t T1[],
+			  uint32_t T2[]) 
 {
-  INT32 x0, x1, x2;
+  uint32_t x0, x1, x2;
   x0 = x & 65535;
   x1 = x >> 16;
   x2 = x0 + x1;
+  x2 = 2 - (x2 >> 16) + (x2 & 65535); //compression
+  if(x2 > 65535){
+    printf("ERROR: ShortTable32 has x2 greater than 16 bits \n");    
+  }
   return T0[x0] ^ T1[x1] ^ T2[x2];
 }
 
@@ -64,30 +90,40 @@ inline INT32 ShortTable32(INT32 x,
 /*
  * fills the random number tables for hashing ShortTable32
  */
-void makeRandShort32(INT32 *T0[],INT32 *T1[],INT32 *T2[]){
-
+void makeRandShort32(uint32_t** T0, uint32_t** T1, uint32_t** T2){
+  *T0 = malloc(65536 * 4);
+  *T1 = malloc(65536 * 4);
+  *T2 = malloc(65536 * 4);
+  int i;
+  for(i = 0; i < 65536; i++){
+    (*T0)[i] = rand32();
+    (*T1)[i] = rand32();
+    (*T2)[i] = rand32();
+  }
 }
 
 /*
  * Clears the random number tables for hashing ShortTable32
  */
-void clearRandShort32(INT32 *T0[],INT32 *T1[],INT32 *T2[]){
-
+void clearRandShort32(uint32_t** T0, uint32_t** T1, uint32_t** T2){
+  free(*T0);
+  free(*T1);
+  free(*T2);
 }
 //A4 Tabulation hased hashing for 32-bit keys using 8-bit characters.
 /* tabulation based hashing for 32-bit key x 
    using 8-bit characters.
    T0, T1, T2 ... T6 are pre-compuated tables */
-inline INT32 CharTable32(int32views x,
-  INT32 *T0[], INT32 *T1[], INT32 *T2[], INT32 *T3[],
-  INT32 T4[], INT32 T5[], INT32 T6[])
+inline uint32_t CharTable32(uint32_tviews x,
+  uint32_t *T0[], uint32_t *T1[], uint32_t *T2[], uint32_t *T3[],
+  uint32_t T4[], uint32_t T5[], uint32_t T6[])
 {
-  INT32 *a0, *a1, *a2, *a3, c;
+  uint32_t *a0, *a1, *a2, *a3, c;
 
-  a0 = T0[x.as_int8s[0]];
-  a1 = T1[x.as_int8s[1]];
-  a2 = T2[x.as_int8s[2]];
-  a3 = T3[x.as_int8s[3]];
+  a0 = T0[x.as_uint8_ts[0]];
+  a1 = T1[x.as_uint8_ts[1]];
+  a2 = T2[x.as_uint8_ts[2]];
+  a3 = T3[x.as_uint8_ts[3]];
 
   c = a0[1] + a1[1] + a2[1] + a3[1];
   
@@ -101,8 +137,8 @@ inline INT32 CharTable32(int32views x,
 /*
  * fills the random number tables for hashing CharTable32
  */
-void makeRandChar32(INT32 *T0[],INT32 *T1[],INT32 *T2[], INT32 *T3[],
-                    INT32 *T4[], INT32 *T5[], INT32 *T6[])
+void makeRandChar32(uint32_t** T0 ,uint32_t** T1,uint32_t** T2, uint32_t** T3,
+                    uint32_t** T4, uint32_t** T5, uint32_t** T6)
 {
 
 }
@@ -110,24 +146,24 @@ void makeRandChar32(INT32 *T0[],INT32 *T1[],INT32 *T2[], INT32 *T3[],
 /*
  * Clears the random number tables for hashing CharTable32
  */
-void clearRandChar32(INT32 *T0[],INT32 *T1[],INT32 *T2[], INT32 *T3[],
-                    INT32 *T4[], INT32 *T5[], INT32 *T6[])
+void clearRandChar32(uint32_t *T0[],uint32_t *T1[],uint32_t *T2[], uint32_t *T3[],
+                    uint32_t *T4[], uint32_t *T5[], uint32_t *T6[])
 {
 }
 // A7 tabulation based hashing for 64-bit key x using 16-bit characters.
 /* tabulation based hashing for 64-bit key x using 16-bit characters.
    T0,.. T6 are precomputed tables */
-inline INT64 ShortTable64(int64views x, 
-			  INT64 *T0[], INT64 *T1[],
-			  INT64 *T2[], INT64 *T3[],
-			  INT64 T4[], INT64 T5[], INT64 T6[])
+inline uint64_t ShortTable64(uint64_tviews x, 
+			  uint64_t *T0[], uint64_t *T1[],
+			  uint64_t *T2[], uint64_t *T3[],
+			  uint64_t T4[], uint64_t T5[], uint64_t T6[])
 {
-  INT64 *a0, *a1, *a2, *a3, c;
+  uint64_t *a0, *a1, *a2, *a3, c;
   
-  a0 = T0[x.as_int16s[0]];
-  a1 = T1[x.as_int16s[1]];
-  a2 = T2[x.as_int16s[2]];
-  a3 = T3[x.as_int16s[3]];
+  a0 = T0[x.as_uint16_ts[0]];
+  a1 = T1[x.as_uint16_ts[1]];
+  a2 = T2[x.as_uint16_ts[2]];
+  a3 = T3[x.as_uint16_ts[3]];
 
   c = a0[1] + a1[1] + a2[1] + a3[1];
   
@@ -140,42 +176,42 @@ inline INT64 ShortTable64(int64views x,
 /*
  * fills the random number tables for hashing ShortTable64
  */
-void makeRandShort64(INT32 *T0[],INT32 *T1[],INT32 *T2[], INT32 *T3[],
-                     INT32 *T4[], INT32 *T5[], INT32 *T6[])
+void makeRandShort64(uint32_t *T0[],uint32_t *T1[],uint32_t *T2[], uint32_t *T3[],
+                     uint32_t *T4[], uint32_t *T5[], uint32_t *T6[])
 {
 }
 
 /*
  * Clears the random number tables for hashing ShortTable64
  */
-void clearRandShort64(INT32 *T0[],INT32 *T1[],INT32 *T2[], INT32 *T3[],
-                      INT32 *T4[], INT32 *T5[], INT32 *T6[])
+void clearRandShort64(uint32_t *T0[],uint32_t *T1[],uint32_t *T2[], uint32_t *T3[],
+                      uint32_t *T4[], uint32_t *T5[], uint32_t *T6[])
 {
 }
 // A8 Tabulation hased hasing for 64-bit keys using 8-bit characters
 /* tabulation based hashing for 64-but key x
    using 8-bit characters.
    T0, T1... T14 are pre-computed tables */
-inline INT64 CharTable64( int64views x, 
+inline uint64_t CharTable64( uint64_tviews x, 
   Entry T0[], Entry T1[], Entry T2[], Entry T3[],
   Entry T4[], Entry T5[], Entry T6[], Entry T7[],
-  INT64 T8[], INT64 T9[], INT64 T10[], INT64 T11[],
-  INT64 T12[], INT64 T13[], INT64 T14[])
+  uint64_t T8[], uint64_t T9[], uint64_t T10[], uint64_t T11[],
+  uint64_t T12[], uint64_t T13[], uint64_t T14[])
 {
   Entry *a0, *a1, *a2, *a3,
         *a4, *a5, *a6, *a7;
-  INT64 c0;
-  INT32 c1;
+  uint64_t c0;
+  uint32_t c1;
 
 
-  a0 = &T0[x.as_int16s[0]];
-  a1 = &T1[x.as_int16s[1]];
-  a2 = &T2[x.as_int16s[2]];
-  a3 = &T3[x.as_int16s[3]];
-  a4 = &T4[x.as_int16s[4]];
-  a5 = &T5[x.as_int16s[5]];
-  a6 = &T6[x.as_int16s[6]];
-  a7 = &T7[x.as_int16s[7]];
+  a0 = &T0[x.as_uint16_ts[0]];
+  a1 = &T1[x.as_uint16_ts[1]];
+  a2 = &T2[x.as_uint16_ts[2]];
+  a3 = &T3[x.as_uint16_ts[3]];
+  a4 = &T4[x.as_uint16_ts[4]];
+  a5 = &T5[x.as_uint16_ts[5]];
+  a6 = &T6[x.as_uint16_ts[6]];
+  a7 = &T7[x.as_uint16_ts[7]];
 
   c0 = a0->u + a1->u + a2->u + a3->u + 
        a4->u + a5->u + a6->u + a7->u;
@@ -195,8 +231,8 @@ inline INT64 CharTable64( int64views x,
  */
 void makeRandChar64(Entry *T0[],Entry *T1[],Entry *T2[], Entry *T3[],
                      Entry *T4[], Entry *T5[], Entry *T6[], Entry *T7,
-                     INT64 *T8[], INT64 *T9[], INT64 *T10[], INT64 *T11[],
-                     INT64 *T12[], INT64 *T13[], INT64 *T14[])
+                     uint64_t *T8[], uint64_t *T9[], uint64_t *T10[], uint64_t *T11[],
+                     uint64_t *T12[], uint64_t *T13[], uint64_t *T14[])
 {
 }
 
@@ -205,21 +241,21 @@ void makeRandChar64(Entry *T0[],Entry *T1[],Entry *T2[], Entry *T3[],
  */
 void clearRandChar64(Entry *T0[],Entry *T1[],Entry *T2[], Entry *T3[],
                      Entry *T4[], Entry *T5[], Entry *T6[], Entry *T7,
-                     INT64 *T8[], INT64 *T9[], INT64 *T10[], INT64 *T11[],
-                     INT64 *T12[], INT64 *T13[], INT64 *T14[])
+                     uint64_t *T8[], uint64_t *T9[], uint64_t *T10[], uint64_t *T11[],
+                     uint64_t *T12[], uint64_t *T13[], uint64_t *T14[])
 {
 
 }
 
 // A9 CW trick for 32-bit kes with prime 2^61 - 1
-const INT64 Prime = (((INT64) 1 ) << 61) - 1;
+const uint64_t Prime = (((uint64_t) 1 ) << 61) - 1;
 /* computes ax + b mod Prime, possbly plus 2*Prime,
    expoiting the structures of Prime */
-inline INT64 MultAddPrime32(INT32 x,
-			    INT64 a,
-			    INT64 b)
+inline uint64_t MultAddPrime32(uint32_t x,
+			    uint64_t a,
+			    uint64_t b)
 {
-  INT64 a0, a1, c0, c1, c;
+  uint64_t a0, a1, c0, c1, c;
   a0 = LOW(a) * x;
   a1 = HIGH(a) * x;
   c0 = a0 + (a1 << 32);
@@ -229,11 +265,11 @@ inline INT64 MultAddPrime32(INT32 x,
 }
 
 // CWtrick for 32-bit key x (Prime = 2^61 - 1)
-inline INT64 CWtrick32(INT32 x, INT64 A,
-		       INT64 B, INT64 C,
-		       INT64 D, INT64 E)
+inline uint64_t CWtrick32(uint32_t x, uint64_t A,
+		       uint64_t B, uint64_t C,
+		       uint64_t D, uint64_t E)
 {
-  INT64 h;
+  uint64_t h;
   h = MultAddPrime32(
       MultAddPrime32(
       MultAddPrime32(
@@ -245,16 +281,17 @@ inline INT64 CWtrick32(INT32 x, INT64 A,
 }
 
 // A11 CW trick for 64-bit keys using prime 2^89 - 1
-const INT64 Prime89_0  = (((INT64) 1) << 32) - 1;
-const INT64 Prime89_1  = (((INT64) 1) << 32) - 1;
-const INT64 Prime89_2  = (((INT64) 1) << 32) - 1;
-const INT64 Prime89_21 = (((INT64) 1) << 32) - 1;
-
+const uint64_t Prime89_0  = (((uint64_t) 1) << 32) - 1;
+const uint64_t Prime89_1  = (((uint64_t) 1) << 32) - 1;
+const uint64_t Prime89_2  = (((uint64_t) 1) << 32) - 1;
+const uint64_t Prime89_21 = (((uint64_t) 1) << 32) - 1;
+/**
 /* Computes (r mod Prime89) mod 2^64,
-   exploiting the structure of Prime89 */
-inline INT64 Mod64Prime89(INT96 r)
+   exploiting the structure of Prime89 
+ 
+inline uint64_t Mod64Prime89(INT96 r)
 {
-  INT64 r0, r1, r2;
+  uint64_t r0, r1, r2;
   // r2r1r0 = r & Prime89 + r >> 89
   r2 =  r[2];
   r1 =  r[1];
@@ -268,13 +305,14 @@ inline INT64 Mod64Prime89(INT96 r)
 }
 
 /* Computes a 96-bit r such that r mod Prime89 == (ax + b) mod Prime89
-   exploiting the structure of Prime89 */
-inline void MultAddPrime89(INT96 r, INT64 x,
+   exploiting the structure of Prime89 
+
+inline void MultAddPrime89(INT96 r, uint64_t x,
 			   INT96 a, INT96 b)
 {
-  INT64 x1, x0, c21, c20, c11, c10, c01, c00;
-  INT64 d0, d1, d2, d3;
-  INT64 s0, s1, carry;
+  uint64_t x1, x0, c21, c20, c11, c10, c01, c00;
+  uint64_t d0, d1, d2, d3;
+  uint64_t s0, s1, carry;
 
   x1 = HIGH(x);
   x0 = LOW(x);
@@ -304,7 +342,7 @@ inline void MultAddPrime89(INT96 r, INT64 x,
 }
 
 // CW trick for 64-bit key x (Prime = 2^89 - 1)
-inline INT64 CWtrick64(INT64 x, INT96 A,
+inline uint64_t CWtrick64(uint64_t x, INT96 A,
 		       INT96 B, INT96 C,
 		       INT96 D, INT96 E)
 {
@@ -319,8 +357,41 @@ inline INT64 CWtrick64(INT64 x, INT96 A,
 
 
 }
-
+*/
 int main(int argc, char *argv[])
 {
   printf("hello world! \n");
+  void* T0;
+  void* T1;
+  void* T2;
+  void* T3;
+  void* T4;
+  void* T5;
+  void* T6;
+  void* T7;
+  void* T8;
+  void* T9;
+  void* T10;
+  void* T11;
+  void* T12;
+  void* T13;
+  void* T14;
+  void* T15;
+
+  printf("The address of T0: %p , T1: %p, T2: %p \n", T0, T1, T2); 
+  makeRandShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2);
+  
+  printf("The address of T0: %p , T1: %p, T2: %p \n", T0, T1, T2); 
+  printf("First few numbers  %u , %u \n", ((uint32_t*)T0)[0], ((uint32_t*)T0)[5]);
+ 
+  //Test for randomness
+  /*
+  printf("Rand is at most %x, %d \n" , RAND_MAX, RAND_MAX); 
+  int i;
+  for( i =0 ; i < 1000; i++){
+    printf("%u, \n",ShortTable32(rand32(), (uint32_t*) T0,(uint32_t*) T1, (uint32_t*) T2 ));
+  }
+  */
+ clearRandShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2);
+
 }
