@@ -81,11 +81,6 @@ inline uint32_t ShortTable32(uint32_t x,
   x0 = x & 65535;
   x1 = x >> 16;
   x2 = x0 + x1;
-  x2 = 2 - (x2 >> 16) + (x2 & 65535); //compression
-  if(x2 > 65535){
-    x2 = x2 & 65535; // NOTE: what is this?
-    //printf("ERROR: ShortTable32 has x2 greater than 16 bits \n");    
-  }
   return T0[x0] ^ T1[x1] ^ T2[x2];
 }
 
@@ -96,11 +91,13 @@ inline uint32_t ShortTable32(uint32_t x,
 void makeRandShort32(uint32_t** T0, uint32_t** T1, uint32_t** T2){
   *T0 = malloc(65536 * 4); //tables of 2^16 32-bit numbers
   *T1 = malloc(65536 * 4); //tables of 2^16 32-bit numbers
-  *T2 = malloc(65536 * 4); //tables of 2^16 32-bit numbers
+  *T2 = malloc(131072 * 4); //tables of 2^17 32-bit numbers
   int i;
   for(i = 0; i < 65536; i++){
     (*T0)[i] = rand32();
     (*T1)[i] = rand32();
+  }
+  for(i = 0; i < 131072;i++){
     (*T2)[i] = rand32();
   }
 }
