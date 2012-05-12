@@ -3,7 +3,7 @@
 #include <inttypes.h>
 // kthxbai
 
-#define TABLE_SIZE 10000000
+#define TABLE_SIZE 100000000
 #define N_HASHES 1000000
 
 // different views of a 64-bit double word
@@ -425,6 +425,7 @@ void linearProbingShort32()
     index_hash = index_hash % TABLE_SIZE;
     while (hash_table[index_hash]) {
       index_hash ++;
+      index_hash = index_hash % TABLE_SIZE;
       n_collisions ++;
     }
     hash_table[index_hash] = 1;
@@ -460,6 +461,7 @@ void linearProbingChar32()
     index_hash = index_hash % TABLE_SIZE;
     while(hash_table[index_hash]) {
       index_hash ++;
+      index_hash = index_hash % TABLE_SIZE;
       n_collisions ++;
     }
     hash_table[index_hash] = 1;
@@ -498,6 +500,7 @@ void linearProbingShort64()
     index_hash = index_hash % TABLE_SIZE;
     while(hash_table[index_hash]) {
       index_hash ++;
+      index_hash = index_hash % TABLE_SIZE;
       n_collisions ++;
     }
     hash_table[index_hash] = 1;
@@ -549,6 +552,7 @@ void linearProbingChar64()
     index_hash = index_hash % TABLE_SIZE;
     while(hash_table[index_hash]) {
       index_hash ++;
+      index_hash = index_hash % TABLE_SIZE;
       n_collisions ++;
     }
     hash_table[index_hash] = 1;
