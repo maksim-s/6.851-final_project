@@ -559,6 +559,35 @@ void linearProbingChar64()
 		  (uint64_t**) &T12, (uint64_t**) &T13, (uint64_t**) &T14);
   printf("Linear Probing (Char64): number of collisions: %d\n", n_collisions);
 }
+/*
+ *     QUADRATIC PROBING 
+ *     BEGINS
+ */
+          //insert quadratic probing code here
+/*
+ *     QUADRATIC PROBING 
+ *     ENDS
+ */
+
+/*
+ *     DOUBLE HASH 
+ *     BEGINS
+ */
+          //insert double hash code here
+/*
+ *     DOUBLE HASH 
+ *     ENDS
+ */
+/*
+ *     CHAINING
+ *     BEGINS
+ */
+          //insert chaining code here
+/*
+ *     CHAINING 
+ *     ENDS
+ */
+
 
 int main(int argc, char *argv[])
 {
