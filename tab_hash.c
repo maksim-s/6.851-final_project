@@ -3,8 +3,8 @@
 #include <inttypes.h>
 // kthxbai
 
-#define TABLE_SIZE 10000000
-#define N_HASHES 1000000
+#define TABLE_SIZE 100000
+#define N_HASHES 100000
 
 // different views of a 64-bit double word
 typedef union {
@@ -579,7 +579,252 @@ void linearProbingChar64()
  *     CHAINING
  *     BEGINS
  */
-          //insert chaining code here
+struct Link32{
+  struct Link32* next;
+  uint32_t value;
+};
+
+typedef struct Link64{
+  struct Link64* next;
+  uint64_t value;
+}Link64;
+
+
+uint32_t chaining32(uint32_t table_size, struct Link32* table[], uint32_t hash, uint32_t value){
+  uint32_t index = hash%table_size;
+  struct Link32* node = table[index];
+  if(node == NULL){
+    struct Link32* newNode = malloc(sizeof(struct Link32));
+    newNode->value = value;
+    newNode->next = NULL;
+    table[index] = newNode;
+    return 0;
+  }
+
+  if(node->value == value){
+    return 0;
+  }
+  uint32_t cc = 0; //collision count  
+  
+  while (node->next != NULL){
+    node = node->next;
+    cc++;
+    if(node->value == value){
+      return cc;
+    }
+  }
+  struct Link32* newNode = malloc(sizeof(struct Link32));
+  newNode->value = value;
+  newNode->next = NULL;
+  node->next = newNode;
+  return cc;
+}
+
+
+void clearChainedTable32(struct Link32* table[], uint32_t table_size){
+  uint32_t i;
+  struct Link32 * node;
+  struct Link32 * nextNode;
+  for(i = 0; i <table_size;i++){
+    if(table[i] != NULL){
+      node = table[i];
+      while(node != NULL){
+        nextNode = node->next;
+        free(node);
+        node = nextNode;
+      }
+    }
+  }
+}
+
+void chainingTestShort32()
+{
+  void* T0;
+  void* T1;
+  void* T2;
+  struct Link32** hash_table = malloc(sizeof(void*)*TABLE_SIZE);
+  int i;
+  uint32_t n_collisions = 0;
+  uint32_t index_hash;
+
+  for (i = 0; i < TABLE_SIZE; i++) {
+    hash_table[i]= NULL;
+  }
+  makeRandShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2);
+  for(i = 0; i < N_HASHES; i++) {
+    index_hash = ShortTable32((uint32_t) i, (uint32_t*) T0,(uint32_t*) T1, (uint32_t*) T2);
+    n_collisions += chaining32(TABLE_SIZE , hash_table , index_hash, i); 
+  }
+  clearRandShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2);
+  printf(" Chaining (Short32): Number of collisions: %d\n", n_collisions);
+  clearChainedTable32(hash_table, TABLE_SIZE);
+}
+
+void chainingTestChar32()
+{
+  void* T0;
+  void* T1;
+  void* T2;
+  void* T3;
+  void* T4;
+  void* T5;
+  void* T6;
+  struct Link32** hash_table = malloc(sizeof(void*)*TABLE_SIZE);
+  int i;
+  uint32_t n_collisions = 0;
+  uint32_t index_hash;
+
+  for (i = 0; i < TABLE_SIZE; i++) {
+    hash_table[i]= NULL;
+  }
+  makeRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
+                 (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
+                 (uint32_t**) &T6);
+  for(i = 0; i < N_HASHES; i++) {
+    index_hash = CharTable32((uint32_t) i, (uint32_t*) T0,(uint32_t*) T1, (uint32_t*) T2,
+                             (uint32_t*) T3, (uint32_t*) T4, (uint32_t*) T5, (uint32_t*) T6);
+    n_collisions += chaining32(TABLE_SIZE , hash_table , index_hash, i); 
+  }
+  clearRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
+                 (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
+                 (uint32_t**) &T6);
+  printf(" Chaining (Char32): Number of collisions: %d\n", n_collisions);
+  clearChainedTable32(hash_table, TABLE_SIZE);
+}
+
+
+uint32_t chaining64(uint64_t table_size, struct Link64* table[], uint64_t hash, uint64_t value){
+  uint64_t index = hash%table_size;
+  struct Link64* node = table[index];
+  if(node == NULL){
+    struct Link64* newNode = malloc(sizeof(struct Link64));
+    newNode->value = value;
+    newNode->next = NULL;
+    table[index] = newNode;
+    return 0;
+  }
+
+  if(node->value == value){
+    return 0;
+  }
+  uint32_t cc = 0; //collision count  
+  
+  while (node->next != NULL){
+    node = node->next;
+    cc++;
+    if(node->value == value){
+      return cc;
+    }
+  }
+  struct Link64* newNode = malloc(sizeof(struct Link64));
+  newNode->value = value;
+  newNode->next = NULL;
+  node->next = newNode;
+  return cc;
+}
+
+
+void clearChainedTable64(struct Link64* table[], uint64_t table_size){
+  uint64_t i;
+  struct Link64 * node;
+  struct Link64 * nextNode;
+  for(i = 0; i <table_size;i++){
+    if(table[i] != NULL){
+      node = table[i];
+      while(node != NULL){
+        nextNode = node->next;
+        free(node);
+        node = nextNode;
+      }
+    }
+  }
+}
+
+void chainingTestShort64()
+{
+  void* T0;
+  void* T1;
+  void* T2;
+  void* T3;
+  void* T4;
+  void* T5;
+  void* T6;
+  void* T7;
+  void* T8;
+  void* T9;
+
+  struct Link64** hash_table = malloc(sizeof(void*)*TABLE_SIZE);
+  int i;
+  uint32_t n_collisions = 0;
+  uint32_t index_hash;
+
+  for (i = 0; i < TABLE_SIZE; i++) {
+    hash_table[i]= NULL;
+  }
+  makeRandShort64((uint64_t**) &T3, (uint64_t**) &T4, (uint64_t**) &T5,
+		  (uint64_t**) &T6, (uint64_t**) &T7, (uint64_t**) &T8,
+		  (uint64_t**) &T9);
+  for(i = 0; i < N_HASHES; i++) {
+    index_hash = ShortTable64((uint64_t) i, (uint64_t*) T3, (uint64_t*) T4,
+                              (uint64_t*) T5, (uint64_t*) T6, (uint64_t*) T7,
+                              (uint64_t*) T8, (uint64_t*) T9 );
+    n_collisions += chaining64(TABLE_SIZE , hash_table , index_hash, i); 
+  }
+  
+  clearRandShort64((uint64_t**) &T3, (uint64_t**) &T4, (uint64_t**) &T5,
+		  (uint64_t**) &T6, (uint64_t**) &T7, (uint64_t**) &T8,
+		  (uint64_t**) &T9);
+  printf(" Chaining (Short64): Number of collisions: %d\n", n_collisions);
+  clearChainedTable64(hash_table, TABLE_SIZE);
+}
+
+void chainingTestChar64()
+{
+  void* T0;
+  void* T1;
+  void* T2;
+  void* T3;
+  void* T4;
+  void* T5;
+  void* T6;
+  void* T7;
+  void* T8;
+  void* T9;
+  void* T10;
+  void* T11;
+  void* T12;
+  void* T13;
+  void* T14;
+
+  struct Link64** hash_table = malloc(sizeof(void*)*TABLE_SIZE);
+  int i;
+  uint32_t n_collisions = 0;
+  uint32_t index_hash;
+
+  for (i = 0; i < TABLE_SIZE; i++) {
+    hash_table[i]= NULL;
+  }
+  makeRandChar64((Entry**) &T0,(Entry**) &T1,(Entry**) &T2, (Entry**) &T3,
+		 (Entry**) &T4, (Entry**) &T5, (Entry**) &T6, (Entry**) &T7,
+		 (uint64_t**) &T8, (uint64_t**) &T9, (uint64_t**) &T10, (uint64_t**) &T11,
+		 (uint64_t**) &T12, (uint64_t**) &T13, (uint64_t**) &T14);
+  for(i = 0; i < N_HASHES; i++) {
+    
+    index_hash =  CharTable64((uint64_t) i, 
+				 (Entry*) T0, (Entry*) T1, (Entry*) T2, (Entry*) T3,
+				 (Entry*) T4, (Entry*) T5, (Entry*) T6, (Entry*) T7,
+				 (uint64_t*) T8, (uint64_t*) T9, (uint64_t*) T10, (uint64_t*) T11,
+				 (uint64_t*) T12, (uint64_t*) T13, (uint64_t*) T14);
+    n_collisions += chaining64(TABLE_SIZE , hash_table , index_hash, i); 
+  }
+  clearRandChar64((Entry**) &T0,(Entry**) &T1,(Entry**) &T2, (Entry**) &T3,
+		 (Entry**) &T4, (Entry**) &T5, (Entry**) &T6, (Entry**) &T7,
+		 (uint64_t**) &T8, (uint64_t**) &T9, (uint64_t**) &T10, (uint64_t**) &T11,
+		 (uint64_t**) &T12, (uint64_t**) &T13, (uint64_t**) &T14);
+  printf(" Chaining (Char32): Number of collisions: %d\n", n_collisions);
+  clearChainedTable64(hash_table, TABLE_SIZE);
+}
+
 /*
  *     CHAINING 
  *     ENDS
@@ -610,6 +855,10 @@ int main(int argc, char *argv[])
   linearProbingShort32();
   linearProbingChar64();
   linearProbingChar32();
+  chainingTestShort32();
+  chainingTestShort64();
+  chainingTestChar32();
+  //chainingTestChar64();
   /*
   makeRandChar64((Entry**) &T0,(Entry**) &T1,(Entry**) &T2, (Entry**) &T3,
 		 (Entry**) &T4, (Entry**) &T5, (Entry**) &T6, (Entry**) &T7,
