@@ -3,7 +3,7 @@
 #include <inttypes.h>
 // kthxbai
 
-#define TABLE_SIZE 100000
+#define TABLE_SIZE 1000000
 #define N_HASHES 100000
 
 // different views of a 64-bit double word
