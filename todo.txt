@@ -1,6 +1,8 @@
-- Reference the paper in code and our report
-- add code to generate all the random number  tables we need
 - write code for collision handling
+  - linear probing
+  - qudratic probing
+  - double hash probing
+  - chaining
 - benchmark by table size, hash size, load factor, different collision handling
 - also try different computer architecture like one 32 bit one 64 bit
 - dictionary!!!??? i..... ummmm
