@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
+#include <time.h>
 // kthxbai
 
-#define TABLE_SIZE 1000000
-#define N_HASHES 100000
+#define TABLE_SIZE 1000
+#define N_HASHES   1000
 
 // different views of a 64-bit double word
 typedef union {
@@ -436,7 +437,7 @@ void probingShort32(uint32_t** T0,
     counter = 0;
     index_hash = ShortTable32((uint32_t) i, (uint32_t*) *T0,(uint32_t*) *T1, (uint32_t*) *T2);
     new_index_hash = index_hash = index_hash % TABLE_SIZE;
-    while (hash_table[new_index_hash] != (uint32_t) 0) {
+    while (hash_table[new_index_hash] != (uint32_t) 0 && counter <= 2*TABLE_SIZE) {
       counter ++;
       if (type == linear) {
 	new_index_hash  = index_hash + counter;
@@ -446,10 +447,11 @@ void probingShort32(uint32_t** T0,
       new_index_hash = new_index_hash % TABLE_SIZE;
       n_collisions ++;
     }
+    printf("%u\n", counter);
     hash_table[new_index_hash] = i;
   }
   free(hash_table);
-  printf("Short32 type: %d, n of collisions: %d\n", type, n_collisions);
+  printf("Short32 type: %d  n of collisions: %d\n", type, n_collisions);
 }
 
 void probingChar32(uint32_t** T0,
@@ -477,7 +479,7 @@ void probingChar32(uint32_t** T0,
     index_hash = CharTable32((uint32_t) i, (uint32_t*) *T0,(uint32_t*) *T1, (uint32_t*) *T2,
 			      (uint32_t*) *T3, (uint32_t*) *T4, (uint32_t*) *T5, (uint32_t*) *T6);
     new_index_hash = index_hash = index_hash % TABLE_SIZE;
-    while (hash_table[new_index_hash] != (uint32_t) 0) {
+    while (hash_table[new_index_hash] != (uint32_t) 0 &&  counter <= 2*TABLE_SIZE) {
       counter ++;
       if (type == linear) {
 	new_index_hash  = index_hash + counter;
@@ -487,10 +489,11 @@ void probingChar32(uint32_t** T0,
       new_index_hash = new_index_hash % TABLE_SIZE;
       n_collisions ++;
     }
+    printf("%u\n", counter);
     hash_table[new_index_hash] = i;
   }
   free(hash_table);
-  printf("Char32 type: %d, n of collisions: %d\n", type, n_collisions);
+  printf("Char32 type: %d n of collisions: %d\n", type, n_collisions);
 }
 
 void probingShort64(uint64_t** T0,
@@ -518,20 +521,21 @@ void probingShort64(uint64_t** T0,
     index_hash = ShortTable64((uint64_t) i, (uint64_t*) *T0,(uint64_t*) *T1, (uint64_t*) *T2,
 			      (uint64_t*) *T3, (uint64_t*) *T4, (uint64_t*) *T5, (uint64_t*) *T6);
     new_index_hash = index_hash = index_hash % TABLE_SIZE;
-    while (hash_table[new_index_hash] != (uint64_t) 0) {
-      counter ++;
+    while (hash_table[new_index_hash] != (uint64_t) 0 && counter <= 2*TABLE_SIZE) {
+      counter++;
       if (type == linear) {
 	new_index_hash  = index_hash + counter;
       } else {
 	new_index_hash = index_hash + counter * counter;
       } 
       new_index_hash = new_index_hash % TABLE_SIZE;
-      n_collisions ++;
+      n_collisions++;
     }
+    printf("%u\n", counter);
     hash_table[new_index_hash] = i;
   }
   free(hash_table);
-  printf("Short64 type: %d, n of collisions: %d\n", type, n_collisions);
+  printf("Short64 type: %d n of collisions: %u\n", type, n_collisions);
 }
 
 void probingChar64(Entry** T0,Entry** T1,Entry** T2, Entry** T3,
@@ -558,7 +562,7 @@ void probingChar64(Entry** T0,Entry** T1,Entry** T2, Entry** T3,
 			     (uint64_t*) *T8, (uint64_t*) *T9, (uint64_t*) *T10, (uint64_t*) *T11,
 			     (uint64_t*) *T12, (uint64_t*) *T13, (uint64_t*) *T14);
     new_index_hash = index_hash = index_hash % TABLE_SIZE;
-    while (hash_table[new_index_hash] != (uint64_t) 0) {
+    while (hash_table[new_index_hash] != (uint64_t) 0 && counter <= 2*TABLE_SIZE) {
       counter ++;
       if (type == linear) {
 	new_index_hash  = index_hash + counter;
@@ -568,10 +572,11 @@ void probingChar64(Entry** T0,Entry** T1,Entry** T2, Entry** T3,
       new_index_hash = new_index_hash % TABLE_SIZE;
       n_collisions ++;
     }
+    printf("%u\n", counter);
     hash_table[new_index_hash] = i;
   }
   free(hash_table);
-  printf("Char64 type: %d, n of collisions: %d\n", type, n_collisions);
+  printf("Char64 type: %d n of collisions: %d\n", type, n_collisions);
 }
 
 void probingTestShort32()
@@ -586,7 +591,7 @@ void probingTestShort32()
 
   // Short 32 linear and quadratic
   makeRandShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2);
-  probingShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2, type);
+  //probingShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2, type);
   probingShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2, type1);
   clearRandShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2);
 
@@ -609,11 +614,11 @@ void probingTestChar32()
   makeRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
                  (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
                  (uint32_t**) &T6);
-
+/*
   probingChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
 		(uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5, (uint32_t**) &T6,
 		type);
-
+*/
   probingChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
 		(uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5, (uint32_t**) &T6,
 		type1);
@@ -640,11 +645,11 @@ void probingTestShort64()
   makeRandShort64((uint64_t**) &T0, (uint64_t**) &T1, (uint64_t**) &T2,
 		  (uint64_t**) &T3, (uint64_t**) &T4, (uint64_t**) &T5,
 		  (uint64_t**) &T6);
-
+/*
   probingShort64((uint64_t**) &T0, (uint64_t**) &T1, (uint64_t**) &T2,
 		 (uint64_t**) &T3, (uint64_t**) &T4, (uint64_t**) &T5, (uint64_t**) &T6,
 		 type);
-
+*/
   probingShort64((uint64_t**) &T0, (uint64_t**) &T1, (uint64_t**) &T2,
 		 (uint64_t**) &T3, (uint64_t**) &T4, (uint64_t**) &T5, (uint64_t**) &T6,
 		 type1);
@@ -681,17 +686,16 @@ void probingTestChar64()
 		 (Entry**) &T4, (Entry**) &T5, (Entry**) &T6, (Entry**) &T7,
 		 (uint64_t**) &T8, (uint64_t**) &T9, (uint64_t**) &T10, (uint64_t**) &T11,
 		 (uint64_t**) &T12, (uint64_t**) &T13, (uint64_t**) &T14);
-  
+  /*
   probingChar64((Entry**) &T0,(Entry**) &T1,(Entry**) &T2, (Entry**) &T3,
 		(Entry**) &T4, (Entry**) &T5, (Entry**) &T6, (Entry**) &T7,
 		(uint64_t**) &T8, (uint64_t**) &T9, (uint64_t**) &T10, (uint64_t**) &T11,
 		(uint64_t**) &T12, (uint64_t**) &T13, (uint64_t**) &T14, type);
-  
+  */
   probingChar64((Entry**) &T0,(Entry**) &T1,(Entry**) &T2, (Entry**) &T3,
 		(Entry**) &T4, (Entry**) &T5, (Entry**) &T6, (Entry**) &T7,
 		(uint64_t**) &T8, (uint64_t**) &T9, (uint64_t**) &T10, (uint64_t**) &T11,
 		(uint64_t**) &T12, (uint64_t**) &T13, (uint64_t**) &T14, type1);
-  
   clearRandChar64((Entry**) &T0,(Entry**) &T1,(Entry**) &T2, (Entry**) &T3,
 		  (Entry**) &T4, (Entry**) &T5, (Entry**) &T6, (Entry**) &T7,
 		  (uint64_t**) &T8, (uint64_t**) &T9, (uint64_t**) &T10, (uint64_t**) &T11,
@@ -727,10 +731,12 @@ uint32_t chaining32(uint32_t table_size, struct Link32* table[], uint32_t hash, 
     newNode->value = value;
     newNode->next = NULL;
     table[index] = newNode;
+    printf("%d\n", 0);
     return 0;
   }
 
   if(node->value == value){
+    printf("%d\n", 0);
     return 0;
   }
   uint32_t cc = 0; //collision count  
@@ -739,6 +745,7 @@ uint32_t chaining32(uint32_t table_size, struct Link32* table[], uint32_t hash, 
     node = node->next;
     cc++;
     if(node->value == value){
+      printf("%d\n", cc);
       return cc;
     }
   }
@@ -746,6 +753,7 @@ uint32_t chaining32(uint32_t table_size, struct Link32* table[], uint32_t hash, 
   newNode->value = value;
   newNode->next = NULL;
   node->next = newNode;
+  printf("%d\n", cc);
   return cc;
 }
 
@@ -830,10 +838,12 @@ uint32_t chaining64(uint64_t table_size, struct Link64* table[], uint64_t hash, 
     newNode->value = value;
     newNode->next = NULL;
     table[index] = newNode;
+    printf("0\n");
     return 0;
   }
 
   if(node->value == value){
+    printf("0\n");
     return 0;
   }
   uint32_t cc = 0; //collision count  
@@ -842,6 +852,7 @@ uint32_t chaining64(uint64_t table_size, struct Link64* table[], uint64_t hash, 
     node = node->next;
     cc++;
     if(node->value == value){
+      printf("%d\n", cc);
       return cc;
     }
   }
@@ -849,6 +860,7 @@ uint32_t chaining64(uint64_t table_size, struct Link64* table[], uint64_t hash, 
   newNode->value = value;
   newNode->next = NULL;
   node->next = newNode;
+  printf("%d\n", cc);
   return cc;
 }
 
@@ -962,15 +974,16 @@ void chainingTestChar64()
 
 int main(int argc, char *argv[])
 {
-  printf("hello world! \n");
-  chainingTestShort32();
-  chainingTestShort64();
-  chainingTestChar32();
-  chainingTestChar64();
+//  printf("hello world! \n");
+  srand(time(NULL));
+ // chainingTestShort32();
+//   chainingTestShort64();
+ // chainingTestChar32();
+//  chainingTestChar64();
 
-  probingTestShort32();
+//  probingTestShort32();
   probingTestChar32();
-  probingTestShort64();
-  probingTestChar64();
+//  probingTestShort64();
+//  probingTestChar64();
   
 }
