@@ -815,6 +815,7 @@ void chainingTestShort32()
   void* T2;
   struct Link32** hash_table = malloc(sizeof(void*)*TABLE_SIZE);
   int i;
+  uint32_t x;
   uint32_t n_collisions = 0;
   uint32_t index_hash;
   uint32_t max_query = 0;
@@ -825,14 +826,15 @@ void chainingTestShort32()
   makeRandShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2);
   clock_t start = clock(), diff;
   for(i = 0; i < N_HASHES; i++) {
-    index_hash = ShortTable32((uint32_t) i, (uint32_t*) T0,(uint32_t*) T1, (uint32_t*) T2);
-    chaining32(TABLE_SIZE , hash_table , index_hash, i);
+    x = rand32();
+    index_hash = ShortTable32((uint32_t) x, (uint32_t*) T0,(uint32_t*) T1, (uint32_t*) T2);
+    chaining32(TABLE_SIZE , hash_table , index_hash, x);
     
     //qt = chaining32(TABLE_SIZE , hash_table , index_hash, i);
     //max_query = (qt > max_query? qt:max_query);
     //printf("%d\n", max_query);
     
-    //n_collisions += chaining32(TABLE_SIZE , hash_table , index_hash, i); 
+    //n_collisions += chaining32(TABLE_SIZE , hash_table , index_hash, x); 
   } 
   diff = clock() - start; 
   int microsec = diff * 1000000 / CLOCKS_PER_SEC;
@@ -853,6 +855,7 @@ void chainingTestChar32()
   void* T6;
   struct Link32** hash_table = malloc(sizeof(void*)*TABLE_SIZE);
   int i;
+  uint32_t x;
   uint32_t n_collisions = 0;
   uint32_t index_hash;
   uint32_t max_query = 0;
@@ -865,14 +868,15 @@ void chainingTestChar32()
                  (uint32_t**) &T6);
   clock_t start = clock(), diff;
   for(i = 0; i < N_HASHES; i++) {
-    index_hash = CharTable32((uint32_t) i, (uint32_t*) T0,(uint32_t*) T1, (uint32_t*) T2,
+    x = rand32();
+    index_hash = CharTable32((uint32_t) x, (uint32_t*) T0,(uint32_t*) T1, (uint32_t*) T2,
                              (uint32_t*) T3, (uint32_t*) T4, (uint32_t*) T5, (uint32_t*) T6);
-    chaining32(TABLE_SIZE , hash_table , index_hash, i);
-    //qt = chaining32(TABLE_SIZE , hash_table , index_hash, i);
+    chaining32(TABLE_SIZE , hash_table , index_hash, x);
+    //qt = chaining32(TABLE_SIZE , hash_table , index_hash, x);
     //max_query = (qt > max_query? qt:max_query);
     //printf("%d\n", max_query);
     
-    //n_collisions += chaining32(TABLE_SIZE , hash_table , index_hash, i); 
+    //n_collisions += chaining32(TABLE_SIZE , hash_table , index_hash, x); 
   } 
   diff = clock() - start; 
   int microsec = diff * 1000000 / CLOCKS_PER_SEC;
@@ -951,6 +955,7 @@ void chainingTestShort64()
 
   struct Link64** hash_table = malloc(sizeof(void*)*TABLE_SIZE);
   int i;
+  uint64_t x;
   uint32_t n_collisions = 0;
   uint32_t index_hash;
 
@@ -964,15 +969,16 @@ void chainingTestShort64()
 		  (uint64_t**) &T9);
   clock_t start = clock(), diff;
   for(i = 0; i < N_HASHES; i++) {
-    index_hash = ShortTable64((uint64_t) i, (uint64_t*) T3, (uint64_t*) T4,
+    x = rand64();
+    index_hash = ShortTable64((uint64_t) x, (uint64_t*) T3, (uint64_t*) T4,
                               (uint64_t*) T5, (uint64_t*) T6, (uint64_t*) T7,
                               (uint64_t*) T8, (uint64_t*) T9 );
-    chaining64(TABLE_SIZE , hash_table , index_hash, i);
-    //qt = chaining64(TABLE_SIZE , hash_table , index_hash, i);
+    chaining64(TABLE_SIZE , hash_table , index_hash, x);
+    //qt = chaining64(TABLE_SIZE , hash_table , index_hash, x);
     //max_query = (qt > max_query? qt:max_query);
     //printf("%d\n", max_query);
     
-    //n_collisions += chaining32(TABLE_SIZE , hash_table , index_hash, i); 
+    //n_collisions += chaining32(TABLE_SIZE , hash_table , index_hash, x); 
   }
   
   diff = clock() - start; 
@@ -1005,6 +1011,7 @@ void chainingTestChar64()
 
   struct Link64** hash_table = malloc(sizeof(void*)*TABLE_SIZE);
   int i;
+  uint64_t x;
   uint32_t n_collisions = 0;
   uint32_t index_hash;
   uint32_t max_query = 0;
@@ -1018,20 +1025,20 @@ void chainingTestChar64()
 		 (uint64_t**) &T12, (uint64_t**) &T13, (uint64_t**) &T14);
   clock_t start = clock(), diff;
   for(i = 0; i < N_HASHES; i++) {
-    
-    index_hash =  CharTable64((uint64_t) i, 
+    x = rand64();
+    index_hash =  CharTable64((uint64_t) x, 
 				 (Entry*) T0, (Entry*) T1, (Entry*) T2, (Entry*) T3,
 				 (Entry*) T4, (Entry*) T5, (Entry*) T6, (Entry*) T7,
 				 (uint64_t*) T8, (uint64_t*) T9, (uint64_t*) T10, (uint64_t*) T11,
 				 (uint64_t*) T12, (uint64_t*) T13, (uint64_t*) T14);
    
-   chaining64(TABLE_SIZE , hash_table , index_hash, i);
+   chaining64(TABLE_SIZE , hash_table , index_hash, x);
  
-    //qt = chaining64(TABLE_SIZE , hash_table , index_hash, i);
+    //qt = chaining64(TABLE_SIZE , hash_table , index_hash, x);
     //max_query = (qt > max_query? qt:max_query);
     //printf("%d\n", max_query);
     
-    //n_collisions += chaining32(TABLE_SIZE , hash_table , index_hash, i); 
+    //n_collisions += chaining32(TABLE_SIZE , hash_table , index_hash, x); 
   } 
   diff = clock() - start; 
   int microsec = diff * 1000000 / CLOCKS_PER_SEC;
@@ -1061,7 +1068,7 @@ int i ;
 for(i= 0 ; i < 100; i++){
 //chainingTestChar64();
 //  chainingTestShort64();
-chainingTestUniv32();
+chainingTestShort32();
 }
 //chainingTestUniv32();
 
