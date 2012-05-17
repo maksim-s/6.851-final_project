@@ -789,14 +789,22 @@ void chainingTestUniv32()
   for (i = 0; i < TABLE_SIZE; i++) {
     hash_table[i]= NULL;
   }
+  clock_t start = clock(), diff;
   for(i = 0; i < N_HASHES; i++) {
     x = rand32();
     index_hash = Univ2(x, a, b);
-    qt = chaining32(TABLE_SIZE , hash_table , index_hash, i);
-    max_query = (qt > max_query? qt:max_query);
-    printf("%d\n", max_query);
+
+    chaining32(TABLE_SIZE , hash_table , index_hash, i);
+    //qt = chaining32(TABLE_SIZE , hash_table , index_hash, i);
+    //max_query = (qt > max_query? qt:max_query);
+    //printf("%d\n", max_query);
+    
     //n_collisions += chaining32(TABLE_SIZE , hash_table , index_hash, i); 
   }
+
+  diff = clock() - start; 
+  int microsec = diff * 1000000 / CLOCKS_PER_SEC;
+  printf("%d\n", microsec);
   //printf(" Chaining (Univ2): Number of collisions: %d\n", n_collisions);
   clearChainedTable32(hash_table, TABLE_SIZE);
 }
@@ -815,13 +823,20 @@ void chainingTestShort32()
     hash_table[i]= NULL;
   }
   makeRandShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2);
+  clock_t start = clock(), diff;
   for(i = 0; i < N_HASHES; i++) {
     index_hash = ShortTable32((uint32_t) i, (uint32_t*) T0,(uint32_t*) T1, (uint32_t*) T2);
-    qt = chaining32(TABLE_SIZE , hash_table , index_hash, i);
-    max_query = (qt > max_query? qt:max_query);
-    printf("%d\n", max_query);
+    chaining32(TABLE_SIZE , hash_table , index_hash, i);
+    
+    //qt = chaining32(TABLE_SIZE , hash_table , index_hash, i);
+    //max_query = (qt > max_query? qt:max_query);
+    //printf("%d\n", max_query);
+    
     //n_collisions += chaining32(TABLE_SIZE , hash_table , index_hash, i); 
-  }
+  } 
+  diff = clock() - start; 
+  int microsec = diff * 1000000 / CLOCKS_PER_SEC;
+  printf("%d\n", microsec);
   clearRandShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2);
   //printf(" Chaining (Short32): Number of collisions: %d\n", n_collisions);
   clearChainedTable32(hash_table, TABLE_SIZE);
@@ -848,14 +863,20 @@ void chainingTestChar32()
   makeRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
                  (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
                  (uint32_t**) &T6);
+  clock_t start = clock(), diff;
   for(i = 0; i < N_HASHES; i++) {
     index_hash = CharTable32((uint32_t) i, (uint32_t*) T0,(uint32_t*) T1, (uint32_t*) T2,
                              (uint32_t*) T3, (uint32_t*) T4, (uint32_t*) T5, (uint32_t*) T6);
-    qt = chaining32(TABLE_SIZE , hash_table , index_hash, i);
-    max_query = (qt > max_query? qt:max_query);
-    printf("%d\n", max_query);
+    chaining32(TABLE_SIZE , hash_table , index_hash, i);
+    //qt = chaining32(TABLE_SIZE , hash_table , index_hash, i);
+    //max_query = (qt > max_query? qt:max_query);
+    //printf("%d\n", max_query);
+    
     //n_collisions += chaining32(TABLE_SIZE , hash_table , index_hash, i); 
-  }
+  } 
+  diff = clock() - start; 
+  int microsec = diff * 1000000 / CLOCKS_PER_SEC;
+  printf("%d\n", microsec);
   clearRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
                  (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
                  (uint32_t**) &T6);
@@ -941,16 +962,22 @@ void chainingTestShort64()
   makeRandShort64((uint64_t**) &T3, (uint64_t**) &T4, (uint64_t**) &T5,
 		  (uint64_t**) &T6, (uint64_t**) &T7, (uint64_t**) &T8,
 		  (uint64_t**) &T9);
+  clock_t start = clock(), diff;
   for(i = 0; i < N_HASHES; i++) {
     index_hash = ShortTable64((uint64_t) i, (uint64_t*) T3, (uint64_t*) T4,
                               (uint64_t*) T5, (uint64_t*) T6, (uint64_t*) T7,
                               (uint64_t*) T8, (uint64_t*) T9 );
-    qt = chaining64(TABLE_SIZE , hash_table , index_hash, i);
-    max_query = (qt > max_query? qt:max_query);
-    printf("%d\n", max_query);
+    chaining64(TABLE_SIZE , hash_table , index_hash, i);
+    //qt = chaining64(TABLE_SIZE , hash_table , index_hash, i);
+    //max_query = (qt > max_query? qt:max_query);
+    //printf("%d\n", max_query);
+    
     //n_collisions += chaining32(TABLE_SIZE , hash_table , index_hash, i); 
   }
   
+  diff = clock() - start; 
+  int microsec = diff * 1000000 / CLOCKS_PER_SEC;
+  printf("%d\n", microsec);
   clearRandShort64((uint64_t**) &T3, (uint64_t**) &T4, (uint64_t**) &T5,
 		  (uint64_t**) &T6, (uint64_t**) &T7, (uint64_t**) &T8,
 		  (uint64_t**) &T9);
@@ -989,6 +1016,7 @@ void chainingTestChar64()
 		 (Entry**) &T4, (Entry**) &T5, (Entry**) &T6, (Entry**) &T7,
 		 (uint64_t**) &T8, (uint64_t**) &T9, (uint64_t**) &T10, (uint64_t**) &T11,
 		 (uint64_t**) &T12, (uint64_t**) &T13, (uint64_t**) &T14);
+  clock_t start = clock(), diff;
   for(i = 0; i < N_HASHES; i++) {
     
     index_hash =  CharTable64((uint64_t) i, 
@@ -996,16 +1024,23 @@ void chainingTestChar64()
 				 (Entry*) T4, (Entry*) T5, (Entry*) T6, (Entry*) T7,
 				 (uint64_t*) T8, (uint64_t*) T9, (uint64_t*) T10, (uint64_t*) T11,
 				 (uint64_t*) T12, (uint64_t*) T13, (uint64_t*) T14);
-    qt = chaining64(TABLE_SIZE , hash_table , index_hash, i);
-    max_query = (qt > max_query? qt:max_query);
-    printf("%d\n", max_query);
+   
+   chaining64(TABLE_SIZE , hash_table , index_hash, i);
+ 
+    //qt = chaining64(TABLE_SIZE , hash_table , index_hash, i);
+    //max_query = (qt > max_query? qt:max_query);
+    //printf("%d\n", max_query);
+    
     //n_collisions += chaining32(TABLE_SIZE , hash_table , index_hash, i); 
-  }
+  } 
+  diff = clock() - start; 
+  int microsec = diff * 1000000 / CLOCKS_PER_SEC;
+  printf("%d\n", microsec);
   clearRandChar64((Entry**) &T0,(Entry**) &T1,(Entry**) &T2, (Entry**) &T3,
 		 (Entry**) &T4, (Entry**) &T5, (Entry**) &T6, (Entry**) &T7,
 		 (uint64_t**) &T8, (uint64_t**) &T9, (uint64_t**) &T10, (uint64_t**) &T11,
 		 (uint64_t**) &T12, (uint64_t**) &T13, (uint64_t**) &T14);
-  printf(" Chaining (Char32): Number of collisions: %d\n", n_collisions);
+  //printf(" Chaining (Char32): Number of collisions: %d\n", n_collisions);
   clearChainedTable64(hash_table, TABLE_SIZE);
 }
 
@@ -1022,7 +1057,12 @@ int main(int argc, char *argv[])
 //  chainingTestShort32();
 //   chainingTestShort64();
 //  chainingTestChar32();
-  chainingTestChar64();
+int i ;
+for(i= 0 ; i < 100; i++){
+//chainingTestChar64();
+//  chainingTestShort64();
+chainingTestUniv32();
+}
 //chainingTestUniv32();
 
 //  probingTestShort32();
