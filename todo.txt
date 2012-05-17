@@ -1,16 +1,12 @@
-- write code for collision handling
-  - linear probing
-  - qudratic probing
-  - double hash probing
-  - chaining
-- benchmark by table size, hash size, load factor, different collision handling
-- also try different computer architecture like one 32 bit one 64 bit
-- dictionary!!!??? i..... ummmm
-  - find a list of words
-  - add code that handles strings
-    - merge two chars into 1
-    -doing that recursively and stuff kthxbai
-    - do benchmark on dictionary stuff
--write the report using sharelatex.com
--make lots of graphs!!!
+-add string hashing for one of the functions
+  -maksim writes hashing for strings in both multiplicative and one of the tabulation hashing
+  probably 32bits
+   -maksim writes linear and quad for those
+
+ - and maksim writes linear and quad for just multiplicative for numbrs
+ - yuzhi does chainging for multuplicative
+ - yuzhi does chaining eventually for strings (both multiplicative and tabulation hashing
+
+-yuzhi: add max query
+-yuzhi: add timing data
 
