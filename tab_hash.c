@@ -5,7 +5,7 @@
 #include <string.h>
 // kthxbai
 
-#define TABLE_SIZE 1000
+#define TABLE_SIZE 60000
 #define N_HASHES   1000
 
 // different views of a 64-bit double word
@@ -161,11 +161,11 @@ inline uint32_t CharTableString(char *x,
 				uint32_t T4[], uint32_t T5[], uint32_t T6[])
 {
   if (strlen((char*) x) <= 4) {
-    return  CharTable32((uint32_t) *x, (uint32_t*) T0, (uint32_t*) T1, (uint32_t*) T2, 
+    return  CharTable32(*(uint32_t*) x, (uint32_t*) T0, (uint32_t*) T1, (uint32_t*) T2, 
 			(uint32_t*) T3, (uint32_t*) T4, (uint32_t*) T5, (uint32_t*) T6);
   } else {
     char* substr1 = substr((char*) x, 0, strlen((char*) x)/2);
-    char* substr2 = substr((char*) x, strlen((char*) x)/2 + 1, strlen((char*) x));
+    char* substr2 = substr((char*) x, strlen((char*) x)/2, strlen((char*) x));
     return  
       CharTableString((char*) substr1, (uint32_t*) T0, (uint32_t*) T1, 
 		      (uint32_t*) T2, (uint32_t*) T3, (uint32_t*) T4,
@@ -182,16 +182,16 @@ inline uint32_t CharTableString(char *x,
  */
 inline uint32_t UnivString(char *x, uint64_t A, uint64_t B)
 {
+  
   if (strlen((char*) x) <= 4) {
-    return  Univ2((uint32_t) *x, A, B);
+    return  Univ2(*(uint32_t*) x, A, B);
   } else {
     char* substr1 = substr((char*) x, 0, strlen((char*) x)/2);
-    char* substr2 = substr((char*) x, strlen((char*) x) + 1, strlen((char*) x));
+    char* substr2 = substr((char*) x, strlen((char*) x)/2, strlen((char*) x));
     return  
       UnivString((char*) substr1, A, B) ^
       UnivString((char*) substr2, A, B);
   }
-
 }
 
 /*
@@ -207,16 +207,7 @@ void makeRandChar32(uint32_t** T0 ,uint32_t** T1,uint32_t** T2, uint32_t** T3,
   *T4 = malloc(1024 * 4); // table of 2^10 32-bit integers
   *T5 = malloc(1024 * 4); // table of 2^10 32-bit integers
   *T6 = malloc(4096 * 4); // table of 2^12 32-bit integers
- /* 
-  printf("T0 address: %p,\
-          \nT1 address: %p,\
-          \nT2 address: %p,\ 
-          \nT3 address: %p,\
-          \nT4 address: %p, \ 
-          \nT5 address: %p, \
-          \nT6 address: %p \n ",\
-          *T0, *T1, *T2, *T3, *T4, *T5, *T6);
-  */
+ 
   int i; 
   for(i = 0; i < 512; i++){
     (*T0)[i] = rand32();
@@ -596,93 +587,63 @@ clock_t start = clock(), diff;
   free(hash_table);
   //printf("Char32 type: %d n of collisions: %d\n", type, n_collisions);
 }
-/*
-void probingUniv32(uint64_t A,
-		   uint64_t B,
-		   enum ProbingType type)
-{
-  uint32_t* hash_table;
-  int i;
-  int n_collisions = 0;
-  uint32_t index_hash;
-  uint32_t new_index_hash;
-  uint32_t counter;
-  uint32_t max_query = 0;
-  uint32_t x = 0;
-  hash_table = malloc(TABLE_SIZE * 4);
-  for (i = 0; i < TABLE_SIZE; i++) {
-    hash_table[i] = (uint32_t) 0;
-  }
-clock_t start = clock(), diff;
-  for(i = 0; i < N_HASHES; i++) {
-    counter = 0;
-    x = rand32();
-    index_hash = Univ2(x, A, B);
-    new_index_hash = index_hash = index_hash % TABLE_SIZE;
-    while (hash_table[new_index_hash] != (uint32_t) 0 &&  counter <= 2*TABLE_SIZE) {
-      counter ++;
-      //if (type == linear) {
-	//new_index_hash  = index_hash + counter;
-     // } else {
-	new_index_hash = index_hash + counter * counter;
-    //  } 
-      new_index_hash = new_index_hash % TABLE_SIZE;
-      //n_collisions ++;
-    }
-   
-    //max_query = (counter > max_query? counter:max_query);
-    //printf("%u\n", max_query);
-    hash_table[new_index_hash] = x;
-  }
-  diff = clock() - start; 
-  int microsec = diff * 1000000 / CLOCKS_PER_SEC;
-  printf("%d\n", microsec);
-  free(hash_table);
-  //printf("CharString type: %d n of collisions: %d\n", type, n_collisions);
-}
-*/
+
 void probingUnivString(uint64_t A,
 		       uint64_t B,
 		       enum ProbingType type)
-{
+{  
+  char *words;
+  words = malloc(58113*16*sizeof(char));
+  if(words == NULL) {
+    fprintf(stderr, "out of memory\n");
+    return ;
+  }
+  FILE *f;
+  f=fopen("words.txt","r");
+  int i = 0;
+  int n_words = 58113;
+  while (!feof(f)) {
+    fscanf(f,"%s", &words[i]);
+    i += 16;
+  }
+  fclose(f);
+
   uint32_t* hash_table;
-  int i;
   int n_collisions = 0;
   uint32_t index_hash;
   uint32_t new_index_hash;
   uint32_t counter;
   uint32_t max_query = 0;
-  char* x = "something"; // get an array of words
   hash_table = malloc(TABLE_SIZE * 4);
   for (i = 0; i < TABLE_SIZE; i++) {
     hash_table[i] = (uint32_t) 0;
   }
-clock_t start = clock(), diff;
-  for(i = 0; i < N_HASHES; i++) {
+  clock_t start = clock(), diff;
+  for(i = 0; i < 58112*16; i+=16) {
     counter = 0;
-    //x = rand32();
-    index_hash = UnivString((char*) x, A, B);
+    index_hash = UnivString((char*) &words[i], A, B);
     new_index_hash = index_hash = index_hash % TABLE_SIZE;
-    while (hash_table[new_index_hash] != (uint32_t) 0 &&  counter <= 2*TABLE_SIZE) {
-      counter ++;
-      //if (type == linear) {
-	//new_index_hash  = index_hash + counter;
-     // } else {
-	new_index_hash = index_hash + counter * counter;
-    //  } 
+    //printf("%d\n", new_index_hash);
+    while (hash_table[new_index_hash] != (uint32_t) 0) {// &&  counter <= 2*TABLE_SIZE) {
+     counter ++;
+     //  if (type == linear) {
+     //new_index_hash  = index_hash + counter;
+	// } else {
+     new_index_hash = index_hash + counter * counter;
+	//} 
       new_index_hash = new_index_hash % TABLE_SIZE;
-      //n_collisions ++;
+      n_collisions ++;
     }
    
-    //max_query = (counter > max_query? counter:max_query);
+    max_query = (counter > max_query? counter:max_query);
     //printf("%u\n", max_query);
-    hash_table[new_index_hash] = new_index_hash; // store something else here
+    hash_table[new_index_hash] = (uint32_t) 1; // store something else here
   }
   diff = clock() - start; 
   int microsec = diff * 1000000 / CLOCKS_PER_SEC;
   printf("%d\n", microsec);
   free(hash_table);
-  //printf("CharString type: %d n of collisions: %d\n", type, n_collisions);
+  //printf("UnivString type: %d n of collisions: %d\n", type, n_collisions);
 }
 
 void probingCharString(uint32_t** T0,
@@ -694,39 +655,51 @@ void probingCharString(uint32_t** T0,
 		       uint32_t** T6,
 		       enum ProbingType type)
 {
+  char *words;
+  words = malloc(58113*16*sizeof(char));
+  if(words == NULL) {
+    fprintf(stderr, "out of memory\n");
+    return ;
+  }
+  FILE *f;
+  f=fopen("words.txt","r");
+  int i = 0;
+  int n_words = 58113;
+  while (!feof(f)) {
+    fscanf(f,"%s", &words[i]);
+    i += 16;
+  }
+  fclose(f);
   uint32_t* hash_table;
-  int i;
   int n_collisions = 0;
   uint32_t index_hash;
   uint32_t new_index_hash;
   uint32_t counter;
   uint32_t max_query = 0;
-  char* x = "something"; // get an array of words from somewhere
   hash_table = malloc(TABLE_SIZE * 4);
   for (i = 0; i < TABLE_SIZE; i++) {
     hash_table[i] = (uint32_t) 0;
   }
-clock_t start = clock(), diff;
-  for(i = 0; i < N_HASHES; i++) {
+  clock_t start = clock(), diff;
+  for(i = 0; i < 58112*16; i+=16) {
     counter = 0;
-    //x = rand32();
-    index_hash = CharTableString((char*) x, (uint32_t*) *T0,(uint32_t*) *T1, (uint32_t*) *T2,
+    index_hash = CharTableString((char*) &words[i], (uint32_t*) *T0,(uint32_t*) *T1, (uint32_t*) *T2,
 			      (uint32_t*) *T3, (uint32_t*) *T4, (uint32_t*) *T5, (uint32_t*) *T6);
     new_index_hash = index_hash = index_hash % TABLE_SIZE;
     while (hash_table[new_index_hash] != (uint32_t) 0 &&  counter <= 2*TABLE_SIZE) {
       counter ++;
       //if (type == linear) {
-	//new_index_hash  = index_hash + counter;
-     // } else {
-	new_index_hash = index_hash + counter * counter;
-    //  } 
+      //new_index_hash  = index_hash + counter;
+	//} else {
+      //new_index_hash = index_hash + counter * counter;
+	//} 
       new_index_hash = new_index_hash % TABLE_SIZE;
       //n_collisions ++;
     }
    
     //max_query = (counter > max_query? counter:max_query);
     //printf("%u\n", max_query);
-    hash_table[new_index_hash] = new_index_hash; // store something different?
+    hash_table[new_index_hash] = (uint32_t) 1; 
   }
   diff = clock() - start; 
   int microsec = diff * 1000000 / CLOCKS_PER_SEC;
@@ -901,15 +874,15 @@ void probingTestCharString()
   makeRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
                  (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
                  (uint32_t**) &T6);
-
+  /*
   probingCharString((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
 		    (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5, (uint32_t**) &T6,
 		    type);
-  
+ */
   probingCharString((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
 		    (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5, (uint32_t**) &T6,
 		    type1);
-
+  
   clearRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
                  (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
                  (uint32_t**) &T6);
@@ -925,7 +898,7 @@ void probingTestUnivString()
   B = rand64();
 
   probingUnivString(A, B, type);
-  probingUnivString(A, B, type1);
+  //probingUnivString(A, B, type1);
 }
 
 void probingTestUniv32()
@@ -1373,31 +1346,13 @@ void chainingTestChar64()
 
 int main(int argc, char *argv[])
 {
-//  printf("hello world! \n");
-  srand(time(NULL));
-//  chainingTestShort32();
-//   chainingTestShort64();
-//  chainingTestChar32();
-int i ;
-for(i= 0 ; i < 100; i++){
-//  probingTestShort32();
-//   probingTestShort64();
-//probingUniv32();
-}
-//int i ;
-//for(i= 0 ; i < 100; i++){
-//probingTestChar32();
-
-//  chainingTestShort64();
-//chainingTestShort32();
-//}
-//chainingTestUniv32();
-
-//probingUniv32();
-//  probingTestShort32();
-//  probingTestChar32();
-//  probingTestShort64();
-//  probingTestChar64();
+  //printf("Hello world!\n");
+  //probingTestUnivString();
+  int i = 0;
+  for (i = 0; i < 100; i++) {
+    probingTestUnivString();
+  }
+ /*
   void *T0;
   void *T1;
   void *T2;
@@ -1420,5 +1375,5 @@ for(i= 0 ; i < 100; i++){
   clearRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
                  (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
                  (uint32_t**) &T6);
-
+ */
 }
