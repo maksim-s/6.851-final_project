@@ -1,5 +1,8 @@
-\documentclass[12pt]{article}
+\documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
+\usepackage{caption}
+\usepackage{subcaption}
+
 
 \usepackage{ifpdf}
 \ifpdf
@@ -105,7 +108,7 @@ it should be good enough for our purpose. We made sure to seed
 the \texttt{rand()} function each time we run our program.
 
 \subsection{Hash Functions}
-We had a 5 hash functions. One is a basic multiplicative function and the four other ones are some variation of the tabulation hash function.
+We had a total of 5 hash functions. One is a basic multiplicative function and the four other ones are some variation of the tabulation hash function.
 \subsubsection{Univ2}
 This is the basic multiplicative hashing. It takes a value to hash, multiply it by a number
 and then adds another number to generate a 32-bit hash. 
@@ -256,15 +259,127 @@ that require a larger table size.
 It also has a 8GB 1067 MHz DDR3 RAM and which should be more than enough to fit all tables
 without paging to disk.
 
-For the analysis of the hash functions, we decided to look at both the number of collisions and the overall time taken to better understand the behavior of the hash tables at different load factors.
+For the analysis of the hash functions, we decided to look at both the number of collisions
+ and the overall time taken to better understand the behavior of the hash tables at 
+ different load factors. The benchmark tests done below are all measured with 
+ attempting to fill a hash table of size 1000 with randomly generated numbers.
 
 \subsection{Collisions}
+First will looking at the performance of each of the hash functions with the 
+different collision resolution. Then we will compare the performance of the
+collision resolutions with the tabulation hash functions. We also collected data on 
+both the average collision count  as well as the running maximum 
+number of collisions as elements are added into the table. For the average number of collisions,
+we took the average of 5 runs for each combination of hash functions and collision resolution.
+
+It is important to remember the number of collisions do not necessarily 
+represent the performance, because each hash function uses a different 
+number of operations and memory accesses.
+
+\subsubsection{Linear Probing}
+From Figure~\ref{fig:linear} shows collision data for creating hash tables. 
+There is no visible difference between the different hash functions in
+terms of number of collisions. This show that all the hash functions are 
+random enough for the 1000 elements. 
+
+\begin{figure}
+        \begin{subfigure}[b]{1\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{linear-collision.png}
+                \caption{The average of number of collisions for different hash functions}
+                \label{fig:linear-collision}
+        \end{subfigure}
+        
+
+         \begin{subfigure}[b]{1\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{linear-max-query.png}
+                \caption{The running maximum number of collisions for different hash functions}
+                \label{fig:linear-max}
+        \end{subfigure}
+        \caption{Collision graphs for hash table with linear probing}\label{fig:linear}
+\end{figure}
 
 
+\subsubsection{Quadratic Probing}
+Figure ~\ref{fig:quad} also shows that there is no significant 
+between the different hash functions.
 
+
+\begin{figure}
+        \begin{subfigure}[b]{1\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{quad-collision.png}
+                \caption{The average of number of collisions for different hash functions}
+                \label{fig:quad-collision}
+        \end{subfigure}       
+
+         \begin{subfigure}[b]{1\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{max-query-quad.png}
+                \caption{The running maximum number of collisions for different hash functions}
+                \label{fig:quad-max}
+        \end{subfigure}
+        \caption{Collision graphs for hash table with quadratic probing}\label{fig:quad}
+\end{figure}
+
+
+\subsubsection{Chaining}
+While the number of collisions for the hash tables with chaining
+is significantly lower, Figure~\ref{fig:chaining} shows a similar 
+behavior between the different hash functions.
+
+
+\begin{figure}
+        \begin{subfigure}[b]{1\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{chaining-collision.png}
+                \caption{The average of number of collisions for different hash functions}
+                \label{fig:chaining-collision}
+        \end{subfigure}
+
+         \begin{subfigure}[b]{1\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{max-query-chaining.png}
+                \caption{The running maximum number of collisions for different hash functions}
+                \label{fig:chaining-max}
+        \end{subfigure}
+        \caption{Collision graphs for hash table with chaining}\label{fig:chaining}
+\end{figure}
+
+
+\subsubsection{Overall}
+The comparison between the different collision resolution is much more interesting.
+The results are shown in Figure~\ref{fig:collision}.
+Throughout the benchmark test, chaining seems for perform much better than the other
+two ways of collision resolution. It grows at much more linear rate. 
+Aside from chaining, quadratic probing seems to be a little bit more 
+efficient than linear problem. This is probably due to the fact that quadratic probing 
+can be more resilient against clusters of occupied slots, by being able to jump over
+the clusters more quickly. However, the average collision count spikes up to drastically
+at a load factor of over 0.95. This is caused by the quadratic nature of the probing. Unlike linear
+probing, quadratic probing can not guarantee to find an empty slot with number of probes
+less than the table size. In order for the program to not stall, we had to cap the number of probes for quadratic probing to twice the size of the table.
+
+\begin{figure}
+        
+                \centering
+                \includegraphics[width=\textwidth]{collision-all.png}
+              \caption{The average number of collision with different collision resolution.}
+              \label{fig:collision}
+\end{figure}
 
 
 \subsection{Time}
+
+\subsubsection{Linear Probing}
+
+\subsubsection{Quadratic Probing}
+
+\subsubsection{Chaining}
+
+
+
 Compare pure hashing vs tabulation hashing
 
 compare linear probing
@@ -280,14 +395,17 @@ some analysis on memory access  and mention pros ad cons of each
 
 \section{Conclusion}
 % Maksim
-summrize what we wanted to find out
+summarize what we wanted to find out
 
 what we did
 
 and the results we found
 
 what we might do next
-maybe look at more specific timing data for when the table is really full
+-maybe look at more specific timing data for when the table is really full
+-also if we had time, we could have further optimized chaining by allocting many links in started 
+instead of calling malloc 1000 times, which could be fairly slow.
+
 
 \bibliographystyle{plain}
 % Stuff will show up here if you use BibTeX
