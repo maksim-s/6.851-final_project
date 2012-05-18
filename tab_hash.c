@@ -417,6 +417,47 @@ void clearRandChar64(Entry** T0,Entry** T1,Entry** T2, Entry** T3,
  *     QUADRATIC and LINEAR PROBING 
  *     BEGINS
  */
+
+void probingUniv32()
+{
+  uint32_t* hash_table;
+  int i;
+  int n_collisions = 0;
+  uint32_t index_hash;
+  uint32_t new_index_hash;
+  uint32_t counter;
+  uint32_t max_query = 0;
+  uint64_t A = rand64();
+  uint64_t B = rand64();
+  uint32_t x;
+  hash_table = malloc(TABLE_SIZE * 4);
+  for (i = 0; i < TABLE_SIZE; i++) {
+    hash_table[i] = (uint32_t) 0;
+  }
+//clock_t start = clock(), diff;
+  for(i = 0; i < N_HASHES; i++) {
+    counter = 0;
+    x= rand32();
+    index_hash = Univ2(x , A , B);
+    new_index_hash = index_hash = index_hash % TABLE_SIZE;
+    while (hash_table[new_index_hash] != (uint32_t) 0 && counter <= 2*TABLE_SIZE) {
+      counter ++;
+	new_index_hash  = index_hash + counter;
+	//new_index_hash = index_hash + counter * counter;
+      new_index_hash = new_index_hash % TABLE_SIZE;
+    //  n_collisions ++;
+    }
+    max_query = (counter > max_query? counter:max_query);
+    printf("%u\n", max_query);
+    hash_table[new_index_hash] = x;
+  }
+  //diff = clock() - start; 
+  //int microsec = diff * 1000000 / CLOCKS_PER_SEC;
+  //printf("%d\n", microsec);
+  free(hash_table);
+  //printf("Short32 type: %d  n of collisions: %d\n", type, n_collisions);
+}
+
 void probingShort32(uint32_t** T0,
 		    uint32_t** T1,
 		    uint32_t** T2,
@@ -1098,12 +1139,12 @@ int main(int argc, char *argv[])
 //  chainingTestChar32();
 int i ;
 for(i= 0 ; i < 100; i++){
-  probingTestShort32();
+//  probingTestShort32();
 //  chainingTestShort64();
-//chainingTestShort32();
+//probingUniv32();
 }
-//chainingTestUniv32();
 
+probingUniv32();
 //  probingTestShort32();
 //  probingTestChar32();
 //  probingTestShort64();
