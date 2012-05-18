@@ -235,13 +235,36 @@ be in the same cache line. The other way is to have a single look-up table that 
 of the number of index and just use \texttt{index*2} and \texttt{index*2+1}. 
 Those two index in a continuous array is almost guaranteed to be on the 
 same cache line, thus reducing the number of times we have to actually 
-go out to memory to retrieve values. This small changed showed a 20\% performence improvement 
+go out to memory to retrieve values. This small changed showed a 20\% performance improvement 
 for the short64, which we believe is significant and important to watch out for.
 
 
 \section{Benchmark Results}
 % Yuzhi
+After programming all the functions, we were finally able to start looking at 
+what interested us in the first place. We were careful in making sure our code 
+would work on different machines and hoped to be able to do benchmark test 
+on various computers. Unfortunately, we were low on time to get access to 
+faster machines and to
+collect data from multiple machines, especially since the process of collecting data
+and generating graphs can be tedious and quite time consuming. 
 
+In the end, we only tested all combination of our hash functions on a 3-year old MacBookPro.
+This machine has a  2.53 GHz Intel Core 2 Duo processor. This processor has a L2 Cache of 3MB.
+This small cache size can limit the performance of the tabulation hashing, especially for functions
+that require a larger table size.
+It also has a 8GB 1067 MHz DDR3 RAM and which should be more than enough to fit all tables
+without paging to disk.
+
+For the analysis of the hash functions, we decided to look at both the number of collisions and the overall time taken to better understand the behavior of the hash tables at different load factors.
+
+\subsection{Collisions}
+
+
+
+
+
+\subsection{Time}
 Compare pure hashing vs tabulation hashing
 
 compare linear probing
