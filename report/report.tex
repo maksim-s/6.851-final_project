@@ -10,7 +10,7 @@
 
 \usepackage[margin=1.25in]{geometry}
 
-\title{Tabulation Hashing Performance Benchmark}
+\title{6.851 Final Project \\ Tabulation Hashing Performance Benchmark}
 \author{Maksim Stephenako \\ Yuzhi Zheng}
 
 \date{May 2012}
@@ -78,6 +78,18 @@ look stuff up etc
 - 5 independence
 \section{Implementation}
 % Yuzhi
+
+We implemented this project in C, hoping the result will be fast and efficiently.
+We enjoyed knowing exactly where certain arrays and variables are going to
+be laid out in memory. In the end, we have approximately 1.5k lines of code,
+including the hash functions, table generation, collision detection, and test code.
+
+Fortunately for us, Thorup and Zhang included the code for tabulation hashing in their
+2010 paper on 5-independent tabulation hashing. We were able to model most of our
+code based on what was included in the paper. We kept the logic behind how the hashes
+are generated, but made some changes on how the structures are stored in the code. 
+Storing fewer pointers, hoping that will use less memory space and have higher performance.
+
 overall view
 
 about each function and mention the difference between them
@@ -115,6 +127,21 @@ and the results we found
 
 \bibliographystyle{plain}
 % Stuff will show up here if you use BibTeX
+\begin{thebibliography}{77}
+
+\bibitem{tz2010}
+M. Thorup, Y. Zhang
+\emph{Tabulation Based 5-Universal Hashing and Linear Probing},
+2010
+
+\bibitem{tz2004}
+M. Thorup and Y. Zhang 
+\emph{Tabulation Based 4-Universal Hashing with Applications to Second Moment Estimation},
+Proc. 15th SODA:608-617 2004.
+
+
+\end{thebibliography}
+
 \bibliography{}
 
 \end{document}

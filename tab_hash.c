@@ -259,18 +259,18 @@ inline uint64_t ShortTable64(uint64_t x,
 {
   uint64_t a00, a01, a10, a11,  a20, a21,  a30, a31, c;
   uint16_t x0, x1, x2, x3;
-  x0 = (uint16_t) x;
-  x1 = (uint16_t) (x >> 16);
-  x2 = (uint16_t) (x >> 32);
-  x3 = (uint16_t) (x >> 48);
+  x0 = (uint16_t) x*2;
+  x1 = (uint16_t) (x >> 16)*2;
+  x2 = (uint16_t) (x >> 32)*2;
+  x3 = (uint16_t) (x >> 48)*2;
   a01 = T0[x0];
   a11 = T1[x1];
   a21 = T2[x2];
   a31 = T3[x3];
-  a00 = T0[x0 + 65536]; // 2^16
-  a10 = T1[x1 + 65536];
-  a20 = T2[x2 + 65536];
-  a30 = T3[x3 + 65536];
+  a00 = T0[x0 + 1]; // 2^16
+  a10 = T1[x1 + 1];
+  a20 = T2[x2 + 1];
+  a30 = T3[x3 + 1];
 
   c = a01 + a11 + a21 + a31;
   
@@ -596,7 +596,7 @@ clock_t start = clock(), diff;
   free(hash_table);
   //printf("Char32 type: %d n of collisions: %d\n", type, n_collisions);
 }
-
+/*
 void probingUniv32(uint64_t A,
 		   uint64_t B,
 		   enum ProbingType type)
@@ -640,7 +640,7 @@ clock_t start = clock(), diff;
   free(hash_table);
   //printf("CharString type: %d n of collisions: %d\n", type, n_collisions);
 }
-
+*/
 void probingUnivString(uint64_t A,
 		       uint64_t B,
 		       enum ProbingType type)
@@ -767,9 +767,9 @@ clock_t start = clock(), diff;
     while (hash_table[new_index_hash] != (uint64_t) 0 && counter <= 2*TABLE_SIZE) {
       counter++;
       //if (type == linear) {
-	//new_index_hash  = index_hash + counter;
+	new_index_hash  = index_hash + counter;
   //    } else {
-	new_index_hash = index_hash + counter * counter;
+	//new_index_hash = index_hash + counter * counter;
     //  } 
        new_index_hash = new_index_hash % TABLE_SIZE;
       //n_collisions++;
@@ -1381,7 +1381,7 @@ int main(int argc, char *argv[])
 int i ;
 for(i= 0 ; i < 100; i++){
 //  probingTestShort32();
-//  chainingTestShort64();
+//   probingTestShort64();
 //probingUniv32();
 }
 //int i ;
@@ -1393,7 +1393,7 @@ for(i= 0 ; i < 100; i++){
 //}
 //chainingTestUniv32();
 
-probingUniv32();
+//probingUniv32();
 //  probingTestShort32();
 //  probingTestChar32();
 //  probingTestShort64();
