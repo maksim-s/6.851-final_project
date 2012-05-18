@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <time.h>
+#include <string.h>
 // kthxbai
 
 #define TABLE_SIZE 1000
@@ -91,6 +92,7 @@ inline uint32_t ShortTable32(uint32_t x,
 }
 
 
+
 /*
  * fills the random number tables for hashing ShortTable32
  */
@@ -116,13 +118,14 @@ void clearRandShort32(uint32_t** T0, uint32_t** T1, uint32_t** T2){
   free(*T1);
   free(*T2);
 }
+
 //A4 Tabulation hased hashing for 32-bit keys using 8-bit characters.
 /* tabulation based hashing for 32-bit key x 
    using 8-bit characters.
    T0, T1, T2 ... T6 are pre-compuated tables */
 inline uint32_t CharTable32(uint32_t x,
-  uint32_t T0[], uint32_t T1[], uint32_t T2[], uint32_t T3[],
-  uint32_t T4[], uint32_t T5[], uint32_t T6[])
+			    uint32_t T0[], uint32_t T1[], uint32_t T2[], uint32_t T3[],
+			    uint32_t T4[], uint32_t T5[], uint32_t T6[])
 {
   uint32_t *a0, *a1, *a2, *a3, c;
 
@@ -130,16 +133,7 @@ inline uint32_t CharTable32(uint32_t x,
   a1 = &T1[((x>>8) & 255) * 2];
   a2 = &T2[((x>>16) & 255) * 2];
   a3 = &T3[((x>>24)) * 2];
-  /*
-  printf("T0 address: %p, a0 address: %p,\
-          \nT1 address: %p, a1 address: %p,\
-          \nT2 address: %p, a2 address: %p,\
-          \nT3 address: %p, a3 address: %p,\
-          \nT4 address: %p,\
-          \nT5 address: %p,\
-          \nT6 address: %p \n",\
-          T0, a0, T1, a1, T2, a2, T3, a3, T4, T5, T6);
-  */
+
   c = a0[1] + a1[1] + a2[1] + a3[1];
   
   return 
@@ -147,6 +141,57 @@ inline uint32_t CharTable32(uint32_t x,
     T4[c & 1023] ^ 
     T5[(c >> 10) & 1023] ^
     T6[c >> 20];
+}
+
+char *substr(const char *inpStr, int startPos, int endPos) {
+
+  int len = endPos - startPos;
+  char *buff = (char*) malloc(len);
+  strncpy(buff, inpStr+startPos, len);
+  
+  return buff;
+}
+
+
+/* tabulation hashing of a string using CharTable32 
+   to produce a 32 bit hash value
+ */
+inline uint32_t CharTableString(char *x,
+				uint32_t T0[], uint32_t T1[], uint32_t T2[], uint32_t T3[],
+				uint32_t T4[], uint32_t T5[], uint32_t T6[])
+{
+  if (strlen((char*) x) <= 4) {
+    return  CharTable32((uint32_t) *x, (uint32_t*) T0, (uint32_t*) T1, (uint32_t*) T2, 
+			(uint32_t*) T3, (uint32_t*) T4, (uint32_t*) T5, (uint32_t*) T6);
+  } else {
+    char* substr1 = substr((char*) x, 0, strlen((char*) x)/2);
+    char* substr2 = substr((char*) x, strlen((char*) x)/2 + 1, strlen((char*) x));
+    return  
+      CharTableString((char*) substr1, (uint32_t*) T0, (uint32_t*) T1, 
+		      (uint32_t*) T2, (uint32_t*) T3, (uint32_t*) T4,
+		      (uint32_t*) T5, (uint32_t*) T6) ^ 
+      CharTableString((char*) substr2, (uint32_t*) T0, (uint32_t*) T1, 
+		      (uint32_t*) T2, (uint32_t*) T3, (uint32_t*) T4,
+		      (uint32_t*) T5, (uint32_t*) T6);
+  }
+
+}
+
+/* tabulation hashing of a string using CharTable32 
+   to produce a 32 bit hash value
+ */
+inline uint32_t UnivString(char *x, uint64_t A, uint64_t B)
+{
+  if (strlen((char*) x) <= 4) {
+    return  Univ2((uint32_t) *x, A, B);
+  } else {
+    char* substr1 = substr((char*) x, 0, strlen((char*) x)/2);
+    char* substr2 = substr((char*) x, strlen((char*) x) + 1, strlen((char*) x));
+    return  
+      UnivString((char*) substr1, A, B) ^
+      UnivString((char*) substr2, A, B);
+  }
+
 }
 
 /*
@@ -552,6 +597,145 @@ clock_t start = clock(), diff;
   //printf("Char32 type: %d n of collisions: %d\n", type, n_collisions);
 }
 
+void probingUniv32(uint64_t A,
+		   uint64_t B,
+		   enum ProbingType type)
+{
+  uint32_t* hash_table;
+  int i;
+  int n_collisions = 0;
+  uint32_t index_hash;
+  uint32_t new_index_hash;
+  uint32_t counter;
+  uint32_t max_query = 0;
+  uint32_t x = 0;
+  hash_table = malloc(TABLE_SIZE * 4);
+  for (i = 0; i < TABLE_SIZE; i++) {
+    hash_table[i] = (uint32_t) 0;
+  }
+clock_t start = clock(), diff;
+  for(i = 0; i < N_HASHES; i++) {
+    counter = 0;
+    x = rand32();
+    index_hash = Univ2(x, A, B);
+    new_index_hash = index_hash = index_hash % TABLE_SIZE;
+    while (hash_table[new_index_hash] != (uint32_t) 0 &&  counter <= 2*TABLE_SIZE) {
+      counter ++;
+      //if (type == linear) {
+	//new_index_hash  = index_hash + counter;
+     // } else {
+	new_index_hash = index_hash + counter * counter;
+    //  } 
+      new_index_hash = new_index_hash % TABLE_SIZE;
+      //n_collisions ++;
+    }
+   
+    //max_query = (counter > max_query? counter:max_query);
+    //printf("%u\n", max_query);
+    hash_table[new_index_hash] = x;
+  }
+  diff = clock() - start; 
+  int microsec = diff * 1000000 / CLOCKS_PER_SEC;
+  printf("%d\n", microsec);
+  free(hash_table);
+  //printf("CharString type: %d n of collisions: %d\n", type, n_collisions);
+}
+
+void probingUnivString(uint64_t A,
+		       uint64_t B,
+		       enum ProbingType type)
+{
+  uint32_t* hash_table;
+  int i;
+  int n_collisions = 0;
+  uint32_t index_hash;
+  uint32_t new_index_hash;
+  uint32_t counter;
+  uint32_t max_query = 0;
+  char* x = "something"; // get an array of words
+  hash_table = malloc(TABLE_SIZE * 4);
+  for (i = 0; i < TABLE_SIZE; i++) {
+    hash_table[i] = (uint32_t) 0;
+  }
+clock_t start = clock(), diff;
+  for(i = 0; i < N_HASHES; i++) {
+    counter = 0;
+    //x = rand32();
+    index_hash = UnivString((char*) x, A, B);
+    new_index_hash = index_hash = index_hash % TABLE_SIZE;
+    while (hash_table[new_index_hash] != (uint32_t) 0 &&  counter <= 2*TABLE_SIZE) {
+      counter ++;
+      //if (type == linear) {
+	//new_index_hash  = index_hash + counter;
+     // } else {
+	new_index_hash = index_hash + counter * counter;
+    //  } 
+      new_index_hash = new_index_hash % TABLE_SIZE;
+      //n_collisions ++;
+    }
+   
+    //max_query = (counter > max_query? counter:max_query);
+    //printf("%u\n", max_query);
+    hash_table[new_index_hash] = new_index_hash; // store something else here
+  }
+  diff = clock() - start; 
+  int microsec = diff * 1000000 / CLOCKS_PER_SEC;
+  printf("%d\n", microsec);
+  free(hash_table);
+  //printf("CharString type: %d n of collisions: %d\n", type, n_collisions);
+}
+
+void probingCharString(uint32_t** T0,
+		       uint32_t** T1,
+		       uint32_t** T2,
+		       uint32_t** T3,
+		       uint32_t** T4,
+		       uint32_t** T5,
+		       uint32_t** T6,
+		       enum ProbingType type)
+{
+  uint32_t* hash_table;
+  int i;
+  int n_collisions = 0;
+  uint32_t index_hash;
+  uint32_t new_index_hash;
+  uint32_t counter;
+  uint32_t max_query = 0;
+  char* x = "something"; // get an array of words from somewhere
+  hash_table = malloc(TABLE_SIZE * 4);
+  for (i = 0; i < TABLE_SIZE; i++) {
+    hash_table[i] = (uint32_t) 0;
+  }
+clock_t start = clock(), diff;
+  for(i = 0; i < N_HASHES; i++) {
+    counter = 0;
+    //x = rand32();
+    index_hash = CharTableString((char*) x, (uint32_t*) *T0,(uint32_t*) *T1, (uint32_t*) *T2,
+			      (uint32_t*) *T3, (uint32_t*) *T4, (uint32_t*) *T5, (uint32_t*) *T6);
+    new_index_hash = index_hash = index_hash % TABLE_SIZE;
+    while (hash_table[new_index_hash] != (uint32_t) 0 &&  counter <= 2*TABLE_SIZE) {
+      counter ++;
+      //if (type == linear) {
+	//new_index_hash  = index_hash + counter;
+     // } else {
+	new_index_hash = index_hash + counter * counter;
+    //  } 
+      new_index_hash = new_index_hash % TABLE_SIZE;
+      //n_collisions ++;
+    }
+   
+    //max_query = (counter > max_query? counter:max_query);
+    //printf("%u\n", max_query);
+    hash_table[new_index_hash] = new_index_hash; // store something different?
+  }
+  diff = clock() - start; 
+  int microsec = diff * 1000000 / CLOCKS_PER_SEC;
+  printf("%d\n", microsec);
+  free(hash_table);
+  //printf("CharString type: %d n of collisions: %d\n", type, n_collisions);
+}
+
+
 void probingShort64(uint64_t** T0,
 		    uint64_t** T1,
 		    uint64_t** T2,
@@ -698,6 +882,63 @@ void probingTestChar32()
   clearRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
                  (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
                  (uint32_t**) &T6);
+}
+
+void probingTestCharString()
+{
+  void* T0;
+  void* T1;
+  void* T2;
+  void* T3;
+  void* T4;
+  void* T5;
+  void* T6;
+  
+  enum ProbingType type = linear;
+  enum ProbingType type1 = quadratic;
+
+    // Char 32 linear and quadratic
+  makeRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
+                 (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
+                 (uint32_t**) &T6);
+
+  probingCharString((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
+		    (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5, (uint32_t**) &T6,
+		    type);
+  
+  probingCharString((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
+		    (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5, (uint32_t**) &T6,
+		    type1);
+
+  clearRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
+                 (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
+                 (uint32_t**) &T6);
+}
+
+void probingTestUnivString()
+{
+  uint64_t A, B;
+  enum ProbingType type = linear;
+  enum ProbingType type1 = quadratic;
+
+  A = rand64();
+  B = rand64();
+
+  probingUnivString(A, B, type);
+  probingUnivString(A, B, type1);
+}
+
+void probingTestUniv32()
+{
+  uint64_t A, B;
+  enum ProbingType type = linear;
+  enum ProbingType type1 = quadratic;
+
+  A = rand64();
+  B = rand64();
+
+  probingUniv32(A, B, type);
+  probingUniv32(A, B, type1);
 }
 
 void probingTestShort64()
@@ -1143,11 +1384,41 @@ for(i= 0 ; i < 100; i++){
 //  chainingTestShort64();
 //probingUniv32();
 }
+//int i ;
+//for(i= 0 ; i < 100; i++){
+//probingTestChar32();
+
+//  chainingTestShort64();
+//chainingTestShort32();
+//}
+//chainingTestUniv32();
 
 probingUniv32();
 //  probingTestShort32();
 //  probingTestChar32();
 //  probingTestShort64();
 //  probingTestChar64();
-  
+  void *T0;
+  void *T1;
+  void *T2;
+  void *T3;
+  void *T4;
+  void *T5;
+  void *T6;
+  makeRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
+                 (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
+                 (uint32_t**) &T6);
+  const char* from = "12345678";
+  uint32_t hash = CharTableString((char*) from, (uint32_t*) T0, (uint32_t*) T1,
+				  (uint32_t*) T2, (uint32_t*) T3,
+				  (uint32_t*) T4, (uint32_t*) T5, 
+				  (uint32_t*) T6);
+  uint32_t x = 23;
+  uint32_t hash2 = CharTable32((uint32_t) x, (uint32_t*) T0,(uint32_t*) T1, (uint32_t*) T2,
+			      (uint32_t*) T3, (uint32_t*) T4, (uint32_t*) T5, (uint32_t*) T6);
+  printf("Hash1: %d hash2: %d\n", hash, hash2);
+  clearRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
+                 (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
+                 (uint32_t**) &T6);
+
 }
