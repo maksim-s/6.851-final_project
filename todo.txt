@@ -1,7 +1,7 @@
 -add string hashing for one of the functions
   -maksim writes hashing for strings in both multiplicative and one of the tabulation hashing
-  probably 32bits
-   -maksim writes linear and quad for those
+  probably 32bits  - Done!
+   -maksim writes linear and quad for those -  done
 
  - and maksim writes linear and quad for just multiplicative for numbrs
  - yuzhi does chainging for multuplicative
