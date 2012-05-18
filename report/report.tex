@@ -1,4 +1,4 @@
-\documentclass[11pt]{article}
+\documentclass[12pt]{article}
 \usepackage[utf8]{inputenc}
 
 \usepackage{ifpdf}
@@ -10,6 +10,7 @@
 
 \usepackage[margin=1.25in]{geometry}
 
+
 \title{6.851 Final Project \\ Tabulation Hashing Performance Benchmark}
 \author{Maksim Stephenako \\ Yuzhi Zheng}
 
@@ -17,7 +18,8 @@
 
 \begin{document}
 
-\setlength{\baselineskip}{1\baselineskip}
+
+\setlength{\baselineskip}{1.15\baselineskip}
 
 \ifpdf
 \DeclareGraphicsExtensions{.pdf, .jpg, .tif}
@@ -212,10 +214,30 @@ T14 & $2^{21}\times8$ bytes\\
 \end{table}
 
 \subsection{Collision Resolution}
-problems we ran into
+For our project, we implemented three different type of collision resolution
+for comparison of performance. One is the basic linear probing, which 
+just checks sequential array indices if the one a key is hashed to is already occupied.
+The quadratic probing looks at the hashed index plus the square of 
+the number of collisions thus far. Lastly the Chaining has a linked-list of values at array
+index. New links can always be appended at the end of the linked-list.
+For both linear and quadratic probing, we store the actual value of the number we
+hashed in the array. The hash table for chaining stores the pointer to the first element
+in the linked-list.
 
-counting collisions instead of absolute time ( or maybe we can do both)
 \subsection{Small Improvements}
+We kept performance in mind as we coded our project. One measurable improvement
+we were able to make is to change the memory access pattern for hash functions that 
+sometimes use a pair of random numbers from one table for each index. For example
+the Short64 and the Char32 both have two random numbers associated to each chunk of data.
+One way is to have two tables for the chunk of bits to index into. However, that requires two 
+memory look ups. Since the tables are fairly large, it is impossible for those two numbers 
+be in the same cache line. The other way is to have a single look-up table that is twice the size
+of the number of index and just use \texttt{index*2} and \texttt{index*2+1}. 
+Those two index in a continuous array is almost guaranteed to be on the 
+same cache line, thus reducing the number of times we have to actually 
+go out to memory to retrieve values. This small changed showed a 20\% performence improvement 
+for the short64, which we believe is significant and important to watch out for.
+
 
 \section{Benchmark Results}
 % Yuzhi
@@ -240,6 +262,9 @@ summrize what we wanted to find out
 what we did
 
 and the results we found
+
+what we might do next
+maybe look at more specific timing data for when the table is really full
 
 \bibliographystyle{plain}
 % Stuff will show up here if you use BibTeX
