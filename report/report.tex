@@ -90,16 +90,132 @@ code based on what was included in the paper. We kept the logic behind how the h
 are generated, but made some changes on how the structures are stored in the code. 
 Storing fewer pointers, hoping that will use less memory space and have higher performance.
 
-overall view
+\subsection{Random Numbers}
 
-about each function and mention the difference between them
+Tabulation hashing requires tables and tables of random numbers in ordering 
+to function correctly. The C language's standard \texttt{rand()} function only
+guarantees up to 15 bits of random bits. However, we needed at least 32-bit
+or 64-bit for each entry in our random number tables. Thus, we recreated our 
+own version of random number generator by calling the \texttt{rand()} function
+and number of times and shifting the randomly generated bits. Even though
+the \texttt{rand()} function is only a pseudorandom number generator, we thought
+it should be good enough for our purpose. We made sure to seed 
+the \texttt{rand()} function each time we run our program.
 
-talk about table sizes and how much space they take
+\subsection{Hash Functions}
+We had a 5 hash functions. One is a basic multiplicative function and the four other ones are some variation of the tabulation hash function.
+\subsubsection{Univ2}
+This is the basic multiplicative hashing. It takes a value to hash, multiply it by a number
+and then adds another number to generate a 32-bit hash. 
 
+\subsubsection{Short32}
+This is a tabulation hashing function. It divides up the 32-bits into 16-bit (\texttt{short}) chunks. 
+It has a look up table for each chunk, as well as the sum of the chunks.  
+This requires a total of 3 random number tables. 
+
+\begin{table}
+\centering 
+\begin{tabular}{|c|c|}
+  \hline
+T0 & $2^{16}\times4$ bytes\\  \hline
+T1 & $2^{16}\times4$ bytes\\ \hline
+T2 & $2^{17}\times4$ bytes\\
+  \hline \hline
+  Total & 1 megabyte \\
+  \hline
+\end{tabular}
+\caption{Space utilized by tables for Short32}
+\label{tab:short32mem}
+\end{table}
+
+\subsubsection{Char32}
+This is also a tabulation hashing function. It divides up the 32-bits into 
+four 8-bit (\texttt{char}) chunks. There is a look up table for each of the
+chunks and a few extra table for additional generated characters. 
+This requires a total of 7 random number tables and 7 table look-ups. 
+Some look-ups uses more than 1 random number from the table.
+
+\begin{table}
+\centering 
+\begin{tabular}{|c|c|}
+  \hline
+T0 & $2^{8}\times 2 \times4$ bytes\\  \hline
+T1 & $2^{8}\times 2 \times4$ bytes\\ \hline
+T2 & $2^{8}\times 2 \times4$ bytes\\  \hline
+T3 & $2^{8}\times 2 \times4$ bytes\\ \hline
+T4 & $2^{10}\times4$ bytes\\  \hline
+T5 & $2^{10}\times4$ bytes\\ \hline
+T6 & $2^{11}\times4$ bytes\\
+  \hline \hline
+  Total & 32 kilobytes \\
+  \hline
+\end{tabular}
+\caption{Space utilized by tables for Char32}
+\label{tab:char32mem}
+\end{table}
+
+\subsubsection{Short64}
+Short64 is a hash function that divides a 64-bit key into 4 chunks of 16-bits.
+The actual algorithm is similar to Char32, except this function has much 
+larger tables, even though it has the same number of tables.
+
+\begin{table}
+\centering 
+\begin{tabular}{|c|c|}
+  \hline
+T0 & $2^{16}\times 2 \times8$ bytes\\  \hline
+T1 & $2^{16}\times 2 \times8$ bytes\\ \hline
+T2 & $2^{16}\times 2 \times8$ bytes\\  \hline
+T3 & $2^{16}\times 2 \times8$ bytes\\ \hline
+T4 & $2^{21}\times8$ bytes\\  \hline
+T5 & $2^{21}\times8$ bytes\\ \hline
+T6 & $2^{22}\times8$ bytes\\
+  \hline \hline
+  Total & 68 megabytes \\
+  \hline
+\end{tabular}
+\caption{Space utilized by tables for Short64}
+\label{tab:short64mem}
+\end{table}
+
+\subsubsection{Char64}
+This is the most complicated tabulation hash function we have.
+It requires 15 lookup tables and also the most number of table
+accesses. However, since each chunk is only 8-bits the total
+size of the lookup tables is actually much smaller than that of short64.
+
+\begin{table}
+\centering 
+\begin{tabular}{|c|c|}
+  \hline
+T0 & $2^{8}\times(1+1+0.5) \times8$ bytes\\  \hline
+T1 & $2^{8}\times(1+1+0.5) \times8$ bytes\\ \hline
+T2 & $2^{8}\times (1+1+0.5) \times8$ bytes\\  \hline
+T3 & $2^{8}\times (1+1+0.5) \times8$ bytes\\ \hline
+T4 & $2^{8}\times(1+1+0.5) \times8$ bytes\\  \hline
+T5 & $2^{8}\times(1+1+0.5) \times8$ bytes\\ \hline
+T6 & $2^{8}\times (1+1+0.5) \times8$ bytes\\  \hline
+T7 & $2^{8}\times (1+1+0.5) \times8$ bytes\\ \hline
+T8 & $2^{11}\times8$ bytes\\  \hline
+T9 & $2^{11}\times8$ bytes\\ \hline
+T10 & $2^{11}\times8$ bytes\\  \hline
+T11 & $2^{11}\times8$ bytes\\ \hline
+T12 & $2^{21}\times8$ bytes\\  \hline
+T13 & $2^{11}\times8$ bytes\\ \hline
+T14 & $2^{21}\times8$ bytes\\
+  \hline \hline
+  Total & $\approx$ 32 megabytes \\
+  \hline
+\end{tabular}
+\caption{Space utilized by tables for Char64}
+\label{tab:char64mem}
+\end{table}
+
+\subsection{Collision Resolution}
 problems we ran into
 
 counting collisions instead of absolute time ( or maybe we can do both)
-
+\subsection{Small Improvements}
 
 \section{Benchmark Results}
 % Yuzhi
