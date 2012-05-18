@@ -371,13 +371,69 @@ less than the table size. In order for the program to not stall, we had to cap t
 
 
 \subsection{Time}
+We measured the amount of time it took the hash functions to fill a hash table
+size of 1000 with random numbers. We ran that 100 times each and plotted the
+cumulative time distribution. The timing is done with the \texttt{clock()} 
+function so we can accurately measure the number of cycles used. 
+Furthermore, we commented out any unnecessary calculations and 
+branching statements that were used for measuring the other metrics 
+in order to have accurate timing data.
 
-\subsubsection{Linear Probing}
+Figure~\ref{fig:timeline} shows the distribution of the timing data we collected.
 
-\subsubsection{Quadratic Probing}
+We noticed a interesting trend for these graphs.
+The hash functions that use 16-bit chunks seem to have a wider range 
+of timing distribution. This is not as obvious  for the 64-bit version of the function.
+However, we can see the effect more clearing in the 32-bit versions of the functions.
+The lower bound of the \texttt{short32} is lower than that of \texttt{char32} 
+but the upper bound is also higher than \texttt{char32}. Intuitively,  \texttt{short32}
+should be faster because it only uses 3 memory accesses, 
+while \texttt{char32} uses 7 memory accesses. This trend makes 
+more sense if we look at size of the tables. The size of all the tables for \texttt{short32}
+takes 1 megabyte according to Table~\ref{tab:short32mem}. The space needed 
+for \texttt{char32} only 32 kilobyte. While both of them will fit comfortably in L2 cache,
+the \texttt{char32} can fit a larger percentage of its tables in L1 cache, which is much faster.
+Despite needing fewer table accesses, \texttt{short32} is more likely to need 
+something outside the L1 cache and thus taking a longer time to hash everything.
+However, if we had a bigger L1 cache, the performance of \texttt{short32} maybe actually
+be better than that of \texttt{char32}.
 
-\subsubsection{Chaining}
 
+\begin{figure}
+	\centering
+        \begin{subfigure}[b]{0.9\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{linear-time.png}
+                \caption{Linear Probing}
+                \label{fig:lineartime}
+        \end{subfigure}
+        
+        \begin{subfigure}[b]{0.9\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{quad-time.png}
+                \caption{Quadratic Probing}
+                \label{fig:chaining-collision}
+        \end{subfigure}
+        
+         \begin{subfigure}[b]{0.9\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{chaining-time.png}
+                \caption{Chaining}
+                \label{fig:chaining-max}
+        \end{subfigure}
+        \caption{Distribution of time for filling a hash table for different collision resolutions and hash functions}\label{fig:timeline}
+\end{figure}
+
+We also plotted the median times for the different hash function and collision resolution,
+as shown in Figure~\ref{fig:timemedian}. 
+
+
+\begin{figure}
+                \centering
+                \includegraphics[width=\textwidth]{time-median.png}
+              \caption{The median time span used to fill hash table.}
+              \label{fig:timemedian}
+\end{figure}
 
 
 Compare pure hashing vs tabulation hashing
