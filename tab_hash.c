@@ -443,16 +443,16 @@ clock_t start = clock(), diff;
     while (hash_table[new_index_hash] != (uint32_t) 0 && counter <= 2*TABLE_SIZE) {
       counter ++;
 //      if (type == linear) {
-	//new_index_hash  = index_hash + counter;
+	new_index_hash  = index_hash + counter;
   //    } else {
-	new_index_hash = index_hash + counter * counter;
+//	new_index_hash = index_hash + counter * counter;
    //   } 
       new_index_hash = new_index_hash % TABLE_SIZE;
     //  n_collisions ++;
     }
     //max_query = (counter > max_query? counter:max_query);
     //printf("%u\n", max_query);
-  //  hash_table[new_index_hash] = x;
+    hash_table[new_index_hash] = x;
   }
   diff = clock() - start; 
   int microsec = diff * 1000000 / CLOCKS_PER_SEC;
@@ -1098,7 +1098,7 @@ int main(int argc, char *argv[])
 //  chainingTestChar32();
 int i ;
 for(i= 0 ; i < 100; i++){
-probingTestChar32();
+  probingTestShort32();
 //  chainingTestShort64();
 //chainingTestShort32();
 }

@@ -1,4 +1,4 @@
-\documentclass[12pt]{article}
+\documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 
 \usepackage{ifpdf}
@@ -8,7 +8,7 @@
 \usepackage{graphicx}
 \fi
 
-\usepackage[margin=1.5in]{geometry}
+\usepackage[margin=1.25in]{geometry}
 
 \title{Tabulation Hashing Performance Benchmark}
 \author{Maksim Stephenako \\ Yuzhi Zheng}
@@ -17,7 +17,7 @@
 
 \begin{document}
 
-\setlength{\baselineskip}{1.25\baselineskip}
+\setlength{\baselineskip}{1\baselineskip}
 
 \ifpdf
 \DeclareGraphicsExtensions{.pdf, .jpg, .tif}
@@ -29,18 +29,38 @@
 
 \section{Introduction}
 % Yuzhi
--everything uses hashing
+Hashing is one of the most basic computer science concept. 
+It allows elements to be reliably stored and 
+retrieved from a limited number of slots, without dedicated slot of every possible 
+variation of the element. While basic, hashing is used everywhere. Hashing is used in 
+associative arrays, sometimes also known as dictionaries, in languages like 
+PHP, Perl, and Python. Hashing can event be used for database indexing. 
+Even lower level computer architectural components like processor caches 
+use ideas from hashing to figure out which line to store value from a particular
+memory address. Hashing can also be used to keep track of sets or make 
+sure certain data representations are unique. Even the famous MapReduce
+framework uses hashing to help shard inputs to be processed on different machines.
 
-- list languanges taht uses hashings for stuff
-	and find other real world uses does databasee or something use hashing?
-	
-	-map reduce o.O?
+From a theoretical standpoint, hashing takes $O(1)$ time, which means it takes a constant
+amount of time. That is essentially as fast as it gets. However, big-O notations can not
+accurately depict the size of the constant factor. These constant factors sometimes
+have a significant but real influence on the performance of any algorithm. 
+Since hashing is used so often, it is important to keep that constant factor
+as low as possible, and finding improvements whenever possible.
 
--big o is important  but real performance is also important
+One of the most basic hashing function is the multiplicative hashing. 
+Thorup and Zhang showed that a different type of hashing, tabulation hashing,
+could potentially be a good alternative to the more basic multiplicative hashing 
+in their paper from 2010. More specifically, they looked at the performance of tabulation hashing
+used in conjunction with linear probing and found the performance to be competitive with
+other hash functions on dense tables.
 
-- while multiplicative hashing might be one of the simpliest hash functions but tabulation hashing might be even better and have better performance as demonstrated by the paper and stuff
-
-- we wahted to see how the other collisions resolution compare and  and the pros and cons of each
+This report takes a closer look at tabulation hashing and it's performance 
+against the basic multiplicative hashing. Instead of only looking at linear 
+probing, we expanded our collision resolution techniques to quadratic probing 
+and also chaining. We plan to do some benchmark testing as well as  
+analyzing the possible pros and cons of each type of hash functions as 
+well as the different collision resolutions.
 
 
 \section{Tabulation Hashing}
