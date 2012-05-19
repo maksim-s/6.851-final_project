@@ -423,7 +423,43 @@ be better than that of \texttt{char32}.
 \end{figure}
 
 We also plotted the median times for the different hash function and collision resolution,
-as shown in Figure~\ref{fig:timemedian}. 
+as shown in Figure~\ref{fig:timemedian}. The three 32-bit functions 
+(Univ2, Short32, and Char32) has fairly similar performance. The \texttt{univ2} 
+being slightly faster, but not by very much. This is probably because this 
+function does not need to access any memory other than the hash table, 
+which fits in small caches fairly well. On the other hand, the two 64-bit functions are much slower.
+Both of those functions take a large about of memory for its tables. According 
+to Table~\ref{tab:short64mem}, \texttt{short64} takes 68 megabytes, 
+and \texttt{char64} takes about 32 megabytes according to Table~\ref{tab:char64mem}.
+Both of them are no where close to fitting in the small L2 cache on the process we are using.
+Thus, aside from having more memory accesses, the cache performance is also very poor.
+
+For all the hash functions chaining performs better than both linear and quadratic hashing. 
+However, chaining does have a higher space requirement, since it needs an 
+additional space to store a the value and pointer to the next link in the linked list. 
+If the space is not a constraint, chaining might be the more effective collision resolution.
+Excluding chaining, quadratic probing seem to perform better than linear probing. 
+Even though quadratic probing does not have the benefit of checking continuous
+locations in memory, the reduction in number of collisions has made it more efficient.
+Keep in mind these timed intervals also include the spike of collisions when the
+load factor is above 0.95. Thus, if the load factor was kept below that, 
+we might see a bigger gap between linear and quadratic probing.
+
+To summarize, the 32-bit functions are much more performant on personal computer. 
+While the 64-bit might function almost just as well on a more powerful machine
+that has much larger cache size, the requires too much space to sufficiently fit in the
+cache of a normal processor. Furthermore, we did not see an clear reduction in collision
+rate while filling up hash tables of 1000 between the 64-bit and 32-bit functions. Thus, unless
+more than the hash table size is greater than $2^{32}$, the 32-bit functions might be sufficient. 
+Between the collisions, we found the chaining to be most performant. However, quadratic
+probing is a better option if space is limited.
+
+Unfortunately, we were unable to reproduce Thorup and Zhang's results [1] that 
+tabulation hashing sometimes had better performance than universal hash 
+functions with the tests we've done. The universal hash functions seemed to 
+always have slightly better performance in our tests. However,
+results could be very different on a processor with better caches.
+
 
 
 \begin{figure}
@@ -434,17 +470,6 @@ as shown in Figure~\ref{fig:timemedian}.
 \end{figure}
 
 
-Compare pure hashing vs tabulation hashing
-
-compare linear probing
-
-compare quadratic probing
-
-compare chaining
-
-compare between the three
-
-some analysis on memory access  and mention pros ad cons of each
 
 
 \section{Conclusion}
