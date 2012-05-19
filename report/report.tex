@@ -302,7 +302,7 @@ random enough for the 1000 elements.
 
 
 \subsubsection{Quadratic Probing}
-Figure ~\ref{fig:quad} also shows that there is no significant difference
+Figure~\ref{fig:quad} also shows that there is no significant difference
 between the different hash functions.
 
 
@@ -348,7 +348,7 @@ behavior between the different hash functions.
 \end{figure}
 
 \subsubsection{Strings Hashing}
-Figure~\ref{fig:string-max-query} shows the comparisons of using our implementation of recursive string hashing vs. the multiplication based hashing together with linear probing, quadratic probing, and chaining.
+Figure~\ref{fig:string-max-query} shows the comparisons of running largest collision numbers using our implementation of recursive string hashing vs. the multiplication based hashing together with linear probing, quadratic probing, and chaining. As we can see from the figure, there is not much difference between different hashing, however we see a big difference between different collision resolution methods. As expected, chaining performs the best. We see an interesting spike for quadratic probing at the end, which is also expected, since it takes more tries for a quadratic function to find the next free spot at high load factors.
 
 \subsubsection{Overall}
 The comparison between the different collision resolution is much more interesting.
@@ -374,7 +374,7 @@ less than the table size. In order for the program to not stall, we had to cap t
 
 \begin{figure}
                 \centering
-                \includegraphics[width= 1.2\textwidth]{string-max-query.png}
+                \includegraphics[width= 1\textwidth]{string-max-query.png}
               \caption{The running maximum for hashing a list of dictionary words.}
               \label{fig:string-max-query}
 \end{figure}
@@ -386,10 +386,8 @@ cumulative time distribution. The timing is done with the \texttt{clock()}
 function so we can accurately measure the number of cycles used. 
 Furthermore, we commented out any unnecessary calculations and 
 branching statements that were used for measuring the other metrics 
-in order to have accurate timing data.
-
-Figure~\ref{fig:timeline} shows the distribution of the timing data we collected.
-
+in order to have accurate timing data. For the string hashing functions we used a list of 58000 unique English words and measured the time it took to hash these words into a hash table of size 60000.
+Figure~\ref{fig:timeline} and Figure~\ref{fig:string-time} show the distribution of the timing data we collected.
 We noticed a interesting trend for these graphs.
 The hash functions that use 16-bit chunks seem to have a wider range 
 of timing distribution. This is not as obvious  for the 64-bit version of the function.
