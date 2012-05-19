@@ -39,7 +39,7 @@ It allows elements to be reliably stored and
 retrieved from a limited number of slots, without dedicated slot of every possible 
 variation of the element. While basic, hashing is used everywhere. Hashing is used in 
 associative arrays, sometimes also known as dictionaries, in languages like 
-PHP, Perl, and Python. Hashing can event be used for database indexing. 
+PHP, Perl, and Python. Hashing can even be used for database indexing. 
 Even lower level computer architectural components like processor caches 
 use ideas from hashing to figure out which line to store value from a particular
 memory address. Hashing can also be used to keep track of sets or make 
@@ -54,7 +54,7 @@ Since hashing is used so often, it is important to keep that constant factor
 as low as possible, and finding improvements whenever possible.
 
 One of the most basic hashing function is the multiplicative hashing. 
-Thorup and Zhang showed that a different type of hashing, tabulation hashing,
+Thorup and Zhang [1] showed that a different type of hashing, tabulation hashing,
 could potentially be a good alternative to the more basic multiplicative hashing 
 in their paper from 2010. More specifically, they looked at the performance of tabulation hashing
 used in conjunction with linear probing and found the performance to be competitive with
@@ -69,18 +69,13 @@ well as the different collision resolutions.
 
 
 \section{Tabulation Hashing}
-% Maksim
-overall idea of tabulation hashing
+In this section we are going to take a closer look at Tabulation Hashing and see how it fits into the $k$-independence paradigm of Wegman and Carter [3]. 
+\subsection{Simple Tabulation Hashing}
+The main idea of Tabulation Hashing is to split the key into $t$ $r$-bit vectors, $x_{0}, x_{1} ... x_{t-1}$, and use those vectors as lookup indices into prepopulated with random numbers lookup-tables, $T_{0}, T_{1} ... T_{t-1}$. After all the necessary values from the tables are obtained, the resulting hash value is calculated using a bit-wise XOR operator to combine all of the values. $$T_{0}[x_{0}] \oplus T_{1}[x_{1}]  \oplus ... \oplus T_{t-1}[x_{t-1}]  $$
 
-make table
+\subsection{Tabulation Hashing Independence}
+The simple form of Tabulation Hashing, described above, is already 3-independent, as shown in Wegman and Carter in [3]. A function $\vec{t}$ that maps values  $x_{0}, x_{1} ... x_{t-1}$ to the corresponding hash value $T_{0}[x_{0}] \oplus T_{1}[x_{1}]  \oplus ... \oplus T_{t-1}[x_{t-1}]  $ is 3-independent as long as $T$ is 3-independent, where $T_{1}, T_{2} .. T_{t-1} \in T$. However we cannot say the same for 4-independent functions, and since 3-independence is not always enough for some applications, in their 2004 paper [2] Thorup and Zhang describe an efficient way to increase the independency degree of Tabulation Hashing by 1. The basic idea behind 4-independent Tabulation Hashing is to create more bit vectors than there is available from splitting the key, by using the already existing bit vectors. For example, given two existing vectors $x_{0}$ and $x_{1}$, we can combine them together to derive a new bit-vector $x_{2} = x_{0} + x_{1}$. So the hash function using this new method will be as following: $$T_{0}[x_{0}] \oplus T_{1}[x_{1}] \oplus T_{2}[x_{0} + x_{1}]$$ It was later realized and proven in [1], again by Thorup and Zhang, that the same hash functions used for 4-independence can also be used to make Tabulation Hashing 5-independent. They show that to get 5-independent hashing from the old methods, it is only necessary to make the pre-computed table to be 5-independent. That doesn't affect the performance at all, since the everything else stays the same and the tables are precomputed ahead of time. 
 
-look stuff up etc
- 
-- 3 independence
- 
-- 4 independence
-
-- 5 independence
 \section{Implementation}
 % Yuzhi
 
@@ -215,7 +210,10 @@ T14 & $2^{21}\times8$ bytes\\
 \caption{Space utilized by tables for Char64}
 \label{tab:char64mem}
 \end{table}
-
+\subsubsection{UnivString}
+In this function we use the multiplicative Univ2 hash function mentioned above to hash strings into 32-bit values. The strings are hashed recursively, as suggested in [1]. If the string is less than or equal to 4 characters (32 bis), then we just use Univ2, otherwise we divide the string into 2 substrings and call the function recursively. We use XOR to combine the results of the recursive calls.
+\subsubsection{CharString}
+This function is very similar to UnivString described above. The only difference is that we Char32 hash function in order to obtain the hash values of strings less than or equal to 4 characters.
 \subsection{Collision Resolution}
 For our project, we implemented three different type of collision resolution
 for comparison of performance. One is the basic linear probing, which 
@@ -395,11 +393,11 @@ some analysis on memory access  and mention pros ad cons of each
 
 \section{Conclusion}
 % Maksim
-summarize what we wanted to find out
+Thorup and Zhang analyzed in [1] how 5-independent Tabulation hashing's performance compared to the most basic Multiplication Based hashing method. In their paper they only used one type of collision resolution methods: linear probing. Following their results, we wanted to see how their results and claims project onto a larger set of experiments. We decided to compare the performance of Tabulation hashing described in their paper with the multiplication based hashing using 3 different collision resolution methods: linear probing, quadratic probing, and chaining. In the paper it is also mentioned that the same functions can be used to hash arrays of characters, or strings. We also decided to analyze how string hashing using 5-independent Tabulation hashing compares to hashing using multiplicative hashing. We implemented and ran a number of experiments to be able to compare all the methods. 
 
-what we did
 
-and the results we found
+
+
 
 what we might do next
 -maybe look at more specific timing data for when the table is really full
@@ -420,8 +418,10 @@ M. Thorup, Y. Zhang
 M. Thorup and Y. Zhang 
 \emph{Tabulation Based 4-Universal Hashing with Applications to Second Moment Estimation},
 Proc. 15th SODA:608-617 2004.
-
-
+\bibitem{wc1981}
+Mark N. Wegman and Larry Carter
+\emph{New classes and applications of hash functions.},
+Journal of Computer and System Sciences, 22(3):265 279, 1981. See also FOCS'79.
 \end{thebibliography}
 
 \bibliography{}

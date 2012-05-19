@@ -689,7 +689,7 @@ void probingCharString(uint32_t** T0,
     while (hash_table[new_index_hash] != (uint32_t) 0 &&  counter <= 2*TABLE_SIZE) {
       counter ++;
       //if (type == linear) {
-      //new_index_hash  = index_hash + counter;
+      new_index_hash  = index_hash + counter;
 	//} else {
       //new_index_hash = index_hash + counter * counter;
 	//} 
@@ -1350,7 +1350,7 @@ int main(int argc, char *argv[])
   //probingTestUnivString();
   int i = 0;
   for (i = 0; i < 100; i++) {
-    probingTestUnivString();
+    probingTestCharString();
   }
  /*
   void *T0;
