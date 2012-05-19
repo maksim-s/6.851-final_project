@@ -261,6 +261,8 @@ For the analysis of the hash functions, we decided to look at both the number of
  and the overall time taken to better understand the behavior of the hash tables at 
  different load factors. The benchmark tests done below are all measured with 
  attempting to fill a hash table of size 1000 with randomly generated numbers.
+ 
+ For the analysis of the string hashing functions, we downloaded a file with 58000 unique English words and ran our experiments using that. The hash table size for these experiments was 60000. Again, we measured the number of collisions each of the collision resolution methods produced with these hash functions and also measured the average time to hash all 58000 words into the table.
 
 \subsection{Collisions}
 First will looking at the performance of each of the hash functions with the 
@@ -275,7 +277,7 @@ represent the performance, because each hash function uses a different
 number of operations and memory accesses.
 
 \subsubsection{Linear Probing}
-From Figure~\ref{fig:linear} shows collision data for creating hash tables. 
+Figure~\ref{fig:linear} shows collision data for creating hash tables. 
 There is no visible difference between the different hash functions in
 terms of number of collisions. This show that all the hash functions are 
 random enough for the 1000 elements. 
@@ -345,6 +347,8 @@ behavior between the different hash functions.
         \caption{Collision graphs for hash table with chaining}\label{fig:chaining}
 \end{figure}
 
+\subsubsection{Strings Hashing}
+Figure~\ref{fig:string-max-query} shows the comparisons of using our implementation of recursive string hashing vs. the multiplication based hashing together with linear probing, quadratic probing, and chaining.
 
 \subsubsection{Overall}
 The comparison between the different collision resolution is much more interesting.
@@ -444,6 +448,7 @@ locations in memory, the reduction in number of collisions has made it more effi
 Keep in mind these timed intervals also include the spike of collisions when the
 load factor is above 0.95. Thus, if the load factor was kept below that, 
 we might see a bigger gap between linear and quadratic probing.
+
 
 To summarize, the 32-bit functions are much more performant on personal computer. 
 While the 64-bit might function almost just as well on a more powerful machine
