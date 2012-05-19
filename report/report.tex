@@ -368,6 +368,13 @@ less than the table size. In order for the program to not stall, we had to cap t
 \end{figure}
 
 
+\begin{figure}
+                \centering
+                \includegraphics[width= 1.2\textwidth]{string-max-query.png}
+              \caption{The running maximum for hashing a list of dictionary words.}
+              \label{fig:string-time}
+\end{figure}
+
 \subsection{Time}
 We measured the amount of time it took the hash functions to fill a hash table
 size of 1000 with random numbers. We ran that 100 times each and plotted the
@@ -445,6 +452,7 @@ Keep in mind these timed intervals also include the spike of collisions when the
 load factor is above 0.95. Thus, if the load factor was kept below that, 
 we might see a bigger gap between linear and quadratic probing.
 
+
 To summarize, the 32-bit functions are much more performant on personal computer. 
 While the 64-bit might function almost just as well on a more powerful machine
 that has much larger cache size, the requires too much space to sufficiently fit in the
@@ -469,6 +477,13 @@ results could be very different on a processor with better caches.
               \label{fig:timemedian}
 \end{figure}
 
+
+\begin{figure}
+                \centering
+                \includegraphics[width=\textwidth]{string-time.png}
+              \caption{The median time span used to hash all the words.}
+              \label{fig:string-time}
+\end{figure}
 
 
 
