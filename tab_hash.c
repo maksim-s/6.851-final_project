@@ -1062,6 +1062,54 @@ void clearChainedTable32(struct Link32* table[], uint32_t table_size){
 }
 
 
+void chainingStringUniv32()
+{
+  
+  char *words;
+  words = malloc(58113*16*sizeof(char));
+  if(words == NULL) {
+    fprintf(stderr, "out of memory\n");
+    return ;
+  }
+  FILE *f;
+  f=fopen("words.txt","r");
+  int i = 0;
+  int n_words = 58113;
+  while (!feof(f)) {
+    fscanf(f,"%s", &words[i]);
+    i += 16;
+  }
+  fclose(f);
+  struct Link32** hash_table = malloc(sizeof(void*)*TABLE_SIZE);
+  uint32_t n_collisions = 0;
+  uint32_t index_hash;
+  uint64_t a = rand64();
+  uint64_t b = rand64();
+  uint32_t x;
+  uint32_t max_query = 0;
+  uint32_t qt; //query time
+  for (i = 0; i < TABLE_SIZE; i++) {
+    hash_table[i]= NULL;
+  }
+  //clock_t start = clock(), diff;
+  for(i = 0; i < 58112*16; i+=16) {
+    index_hash = UnivString((char*) &words[i], a, b);
+
+    //chaining32(TABLE_SIZE , hash_table , index_hash, i);
+    qt = chaining32(TABLE_SIZE , hash_table , index_hash, i);
+    max_query = (qt > max_query? qt:max_query);
+    printf("%d\n", max_query);
+    
+    //n_collisions += chaining32(TABLE_SIZE , hash_table , index_hash, i); 
+  }
+
+  //diff = clock() - start; 
+  //int microsec = diff * 1000000 / CLOCKS_PER_SEC;
+  //printf("%d\n", microsec);
+  //printf(" Chaining (Univ2): Number of collisions: %d\n", n_collisions);
+  clearChainedTable32(hash_table, TABLE_SIZE);
+}
+
 void chainingTestUniv32()
 {
   struct Link32** hash_table = malloc(sizeof(void*)*TABLE_SIZE);
@@ -1076,22 +1124,22 @@ void chainingTestUniv32()
   for (i = 0; i < TABLE_SIZE; i++) {
     hash_table[i]= NULL;
   }
-  clock_t start = clock(), diff;
+  //clock_t start = clock(), diff;
   for(i = 0; i < N_HASHES; i++) {
     x = rand32();
     index_hash = Univ2(x, a, b);
 
-    chaining32(TABLE_SIZE , hash_table , index_hash, i);
-    //qt = chaining32(TABLE_SIZE , hash_table , index_hash, i);
-    //max_query = (qt > max_query? qt:max_query);
-    //printf("%d\n", max_query);
+    //chaining32(TABLE_SIZE , hash_table , index_hash, i);
+    qt = chaining32(TABLE_SIZE , hash_table , index_hash, i);
+    max_query = (qt > max_query? qt:max_query);
+    printf("%d\n", max_query);
     
     //n_collisions += chaining32(TABLE_SIZE , hash_table , index_hash, i); 
   }
 
-  diff = clock() - start; 
-  int microsec = diff * 1000000 / CLOCKS_PER_SEC;
-  printf("%d\n", microsec);
+  //diff = clock() - start; 
+  //int microsec = diff * 1000000 / CLOCKS_PER_SEC;
+  //printf("%d\n", microsec);
   //printf(" Chaining (Univ2): Number of collisions: %d\n", n_collisions);
   clearChainedTable32(hash_table, TABLE_SIZE);
 }
@@ -1128,6 +1176,69 @@ void chainingTestShort32()
   printf("%d\n", microsec);
   clearRandShort32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2);
   //printf(" Chaining (Short32): Number of collisions: %d\n", n_collisions);
+  clearChainedTable32(hash_table, TABLE_SIZE);
+}
+
+
+void chainingStringChar32()
+{
+  
+  char *words;
+  words = malloc(58113*16*sizeof(char));
+  if(words == NULL) {
+    fprintf(stderr, "out of memory\n");
+    return ;
+  }
+  FILE *f;
+  f=fopen("words.txt","r");
+  int i = 0;
+  int n_words = 58113;
+  while (!feof(f)) {
+    fscanf(f,"%s", &words[i]);
+    i += 16;
+  }
+  fclose(f);
+
+  void* T0;
+  void* T1;
+  void* T2;
+  void* T3;
+  void* T4;
+  void* T5;
+  void* T6;
+  struct Link32** hash_table = malloc(sizeof(void*)*TABLE_SIZE);
+  uint32_t x;
+  uint32_t n_collisions = 0;
+  uint32_t index_hash;
+  uint32_t max_query = 0;
+  uint32_t qt; //query time
+  for (i = 0; i < TABLE_SIZE; i++) {
+    hash_table[i]= NULL;
+  }
+  makeRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
+                 (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
+                 (uint32_t**) &T6);
+  //clock_t start = clock(), diff;
+  
+  for(i = 0; i < 58112*16; i+=16){ 
+   index_hash = CharTableString((char*) &words[i], (uint32_t*) T0,(uint32_t*) T1,
+                                (uint32_t*) T2, (uint32_t*) T3, (uint32_t*) T4, 
+                                (uint32_t*) T5, (uint32_t*) T6);
+
+    //chaining32(TABLE_SIZE , hash_table , index_hash, x);
+    qt = chaining32(TABLE_SIZE , hash_table , index_hash, i);
+    max_query = (qt > max_query? qt:max_query);
+    printf("%d\n", max_query);
+    
+    //n_collisions += chaining32(TABLE_SIZE , hash_table , index_hash, x); 
+  } 
+  //diff = clock() - start; 
+  //int microsec = diff * 1000000 / CLOCKS_PER_SEC;
+  //printf("%d\n", microsec);
+  clearRandChar32((uint32_t**) &T0, (uint32_t**) &T1, (uint32_t**) &T2,
+                 (uint32_t**) &T3, (uint32_t**) &T4, (uint32_t**) &T5,
+                 (uint32_t**) &T6);
+  //printf(" Chaining (Char32): Number of collisions: %d\n", n_collisions);
   clearChainedTable32(hash_table, TABLE_SIZE);
 }
 
@@ -1352,6 +1463,7 @@ int main(int argc, char *argv[])
   for (i = 0; i < 100; i++) {
     probingTestCharString();
   }
+
  /*
   void *T0;
   void *T1;
