@@ -300,7 +300,7 @@ random enough for the 1000 elements.
 
 
 \subsubsection{Quadratic Probing}
-Figure ~\ref{fig:quad} also shows that there is no significant 
+Figure ~\ref{fig:quad} also shows that there is no significant difference
 between the different hash functions.
 
 
@@ -349,10 +349,10 @@ behavior between the different hash functions.
 \subsubsection{Overall}
 The comparison between the different collision resolution is much more interesting.
 The results are shown in Figure~\ref{fig:collision}.
-Throughout the benchmark test, chaining seems for perform much better than the other
+Throughout the benchmark test, chaining seems to perform much better than the other
 two ways of collision resolution. It grows at much more linear rate. 
 Aside from chaining, quadratic probing seems to be a little bit more 
-efficient than linear problem. This is probably due to the fact that quadratic probing 
+efficient than linear probing. This is probably due to the fact that quadratic probing 
 can be more resilient against clusters of occupied slots, by being able to jump over
 the clusters more quickly. However, the average collision count spikes up to drastically
 at a load factor of over 0.95. This is caused by the quadratic nature of the probing. Unlike linear
@@ -449,16 +449,8 @@ some analysis on memory access  and mention pros ad cons of each
 
 \section{Conclusion}
 % Maksim
-Thorup and Zhang analyzed in [1] how 5-independent Tabulation hashing's performance compared to the most basic Multiplication Based hashing method. In their paper they only used one type of collision resolution methods: linear probing. Following their results, we wanted to see how their results and claims project onto a larger set of experiments. We decided to compare the performance of Tabulation hashing described in their paper with the multiplication based hashing using 3 different collision resolution methods: linear probing, quadratic probing, and chaining. In the paper it is also mentioned that the same functions can be used to hash arrays of characters, or strings. We also decided to analyze how string hashing using 5-independent Tabulation hashing compares to hashing using multiplicative hashing. We implemented and ran a number of experiments to be able to compare all the methods. 
-
-
-
-
-
-what we might do next
--maybe look at more specific timing data for when the table is really full
--also if we had time, we could have further optimized chaining by allocting many links in started 
-instead of calling malloc 1000 times, which could be fairly slow.
+Thorup and Zhang analyzed in [1] how 5-independent Tabulation hashing's performance compared to the most basic Multiplication Based hashing method. In their paper they only used one type of collision resolution methods: linear probing. Following their results, we wanted to see how their results and claims project onto a larger set of experiments. We decided to compare the performance of Tabulation hashing described in their paper with the multiplication based hashing using 3 different collision resolution methods: linear probing, quadratic probing, and chaining. In the paper it is also mentioned that the same functions can be used to hash arrays of characters, or strings. We also decided to analyze how string hashing using 5-independent Tabulation hashing compares to hashing using multiplicative hashing. We implemented and ran a number of experiments to be able to compare all the methods. In comparing the performance we focused on the number of collisions and the average time it takes to hash that each of the methods combined with a collision resolution produce. 
+As was shown above we got a lot of interesting results from our experiments. We were able to see that the results presented in [1] were also consistent with ours. We also saw that they behaved consistently with the previous results when we used them with other methods of collision resolution and to hash strings. In the future it would be interesting to see a more elaborate analysis of the timing of these hash functions. In this paper we only discussed the average time it takes to hash a certain number of random keys, however one can get even more insights from, for example, analyzing the timing information under different work loads and different hash table load factors. It would also be interesting to see how these functions would perform in some real-world application. 
 
 
 \bibliographystyle{plain}
